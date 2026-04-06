@@ -21,6 +21,9 @@ function App() {
                   <Button appearance="themed" mode="primary" onClick={() => {}} size="medium">
                     Button
                   </Button>
+                  <Button appearance="themed" mode="primary" onClick={() => {}} size="medium">
+                    Button
+                  </Button>
               </Container>
           </Grid>
       </Panel>)
