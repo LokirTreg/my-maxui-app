@@ -4,9 +4,15 @@ import { Arrival } from './pages/Arrival';
 
 function App() {
   const { webApp, user } = useMaxWebApp();
-
+  var t = ""
+    if (webApp){
+        t = "WebApp есть"
+    }
   if (1 == 1) {
-    return <Arrival warehouseName="ворота" />;
+    return <Panel mode="secondary" className="panel">
+        <Arrival warehouseName="ворота" />;
+        <Panel id="panel">t</Panel>
+        </Panel>
   }
 
   return (
