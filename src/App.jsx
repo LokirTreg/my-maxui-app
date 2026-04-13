@@ -15,13 +15,11 @@ function App() {
         t += " window.WebApp есть"
         window.WebApp.requestContact().then(({phone}) => {
             t += " Номер телефона пользователя" + phone
+            return <Panel className="panel">
+                <Arrival warehouseName="ворота" />
+                <Panel mode="secondary" id="panel">{t}</Panel>
+                </Panel>
         });
-    }
-    if (1 == 1) {
-        return <Panel className="panel">
-            <Arrival warehouseName="ворота" />
-            <Panel mode="secondary" id="panel">{t}</Panel>
-            </Panel>
     }
 
     return (
