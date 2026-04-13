@@ -1,10 +1,14 @@
 import { Panel, Grid, Container, Flex, Avatar, Typography, Button } from '@maxhub/max-ui';
 import { useMaxWebApp } from './hooks/1';
+import { Arrival } from './pages/Arrival';
 
 function App() {
-
   const { webApp, user } = useMaxWebApp();
-  console.log(webApp, user)
+
+  if (1 == 1) {
+    return <Arrival warehouseName="ворота" />;
+  }
+
   return (
       <Panel mode="secondary" className="panel">
           <Grid gap={12} cols={1}>
