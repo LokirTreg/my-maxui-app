@@ -11,39 +11,23 @@ function App() {
     if (user){
         t += " user есть"
     }
+    let oldPhone = localStorage.getItem('phone')
+    if(oldPhone){
+        
+        t += " телефон уже был" + oldPhone
+    }
     if (window.WebApp){
         t += " window.WebApp есть"
         window.WebApp.requestContact().then(({phone}) => {
+            localStorage.setItem('phone', phone);
             t += " Номер телефона пользователя" + phone
-            return <Panel className="panel">
-                <Arrival warehouseName="ворота" />
-                <Panel mode="secondary" id="panel">{t}</Panel>
-                </Panel>
+            
         });
     }
-
-    return (
-        <Panel mode="secondary" className="panel">
-            <Grid gap={12} cols={1}>
-                <Container className="me">
-                    <Flex direction="column" align="center">
-                        <Avatar.Container size={72} form="squircle" className="me__avatar">
-                            <Avatar.Image src="https://sun9-21.userapi.com/1N-rJz6-7hoTDW7MhpWe19e_R_TdGV6Wu5ZC0A/67o6-apnAks.jpg" />
-                        </Avatar.Container>
-
-                        <Typography.Title>Иван Иванов</Typography.Title>
-                    </Flex>
-                </Container>
-                <Container className="me">
-                    <Button appearance="themed" mode="primary" onClick={() => {}} size="medium">
-                        Button
-                    </Button>
-                    <Button appearance="themed" mode="primary" onClick={() => {}} size="medium">
-                        Button
-                    </Button>
-                </Container>
-            </Grid>
-        </Panel>)
+    return <Panel className="panel">
+                    <Arrival warehouseName="ворота" />
+                    <Panel mode="secondary" id="panel">{t}</Panel>
+                    </Panel>
 }
 
 export default App;
