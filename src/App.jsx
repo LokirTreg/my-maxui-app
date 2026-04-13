@@ -12,8 +12,9 @@ function App() {
         t += " user есть"
     }
     if (window.WebApp){
+        t += " window.WebApp есть"
         window.WebApp.requestContact().then(({phone}) => {
-            t += `Номер телефона пользователя ${phone}`
+            t += " Номер телефона пользователя" + phone
         });
     }
     if (1 == 1) {
