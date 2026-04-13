@@ -11,10 +11,11 @@ function App() {
     if (user){
         t += " user есть"
     }
-    webApp.requestContact().then(({phone}) => {
-        t += `Номер телефона пользователя ${phone}`
-    });
-
+    if (window.WebApp){
+        window.WebApp.requestContact().then(({phone}) => {
+            t += `Номер телефона пользователя ${phone}`
+        });
+    }
     if (1 == 1) {
         return <Panel className="panel">
             <Arrival warehouseName="ворота" />
