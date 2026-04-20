@@ -6,40 +6,41 @@ import { useState, useEffect, useRef } from 'react';
 
 function App() {
     const { webApp, user } = useMaxWebApp();
-    const [info, setInfo] = useState("");
+    const [infoElements, setInfoElements] = useState([]); // Массив элементов
     const [phoneNumber, setPhoneNumber] = useState("");
     const hasRequested = useRef(false);
 
     useEffect(() => {
         if (hasRequested.current) return;
-        
-        let t = "";
-        
-        if (webApp) {
-            t += "WebApp есть ";
-        }
-        if (user) {
-            t += "user есть ";
-        }
-        
+                
         if (window.WebApp && !hasRequested.current) {
             hasRequested.current = true;
-            t += "window.WebApp есть ";
-            setInfo(t);
+            
+            // Добавляем первый элемент
+            setInfoElements([
+                <Typography.Body key="webapp">window.WebApp успешно подключен</Typography.Body>
+            ]);
             
             window.WebApp.requestContact()
                 .then(({phone}) => {
                     localStorage.setItem('phone', phone);
                     setPhoneNumber(phone);
-                    setInfo(prev => prev + "<br>Номер телефона пользователя: " + phone);
+                    // Добавляем второй элемент
+                    setInfoElements(prev => [
+                        ...prev,
+                        <Typography.Body key="phone">Телефон: {phone}</Typography.Body>
+                    ]);
                 })
                 .catch(error => {
                     console.error("Ошибка запроса контакта:", error);
-                    setInfo(prev => prev + "<br>Ошибка получения телефона");
+                    setInfoElements(prev => [
+                        ...prev,
+                        <Typography.Body key="error" style={{ color: 'red' }}>
+                            Ошибка получения телефона
+                        </Typography.Body>
+                    ]);
                     hasRequested.current = false;
                 });
-        } else {
-            setInfo(t);
         }
     }, [webApp, user]);
 
@@ -49,10 +50,7 @@ function App() {
                 <Arrival warehouseName="ворота" />
             </Panel>
             <DevBox>
-                <Panel mode="secondary" id="panel">
-                    {info}
-                    {phoneNumber && <div>Телефон: {phoneNumber}</div>}
-                </Panel>
+                infoElements
             </DevBox>
         </Container>
     );
