@@ -2,6 +2,7 @@ import { Panel, Grid, Container, Flex, Avatar, Typography, Button } from '@maxhu
 import { useMaxWebApp } from './hooks/1';
 import { Arrival } from './pages/Arrival';
 import { DevBox } from './elements/DevBox';
+import { LogLine } from './elements/LogLine';
 import { useState, useEffect, useRef } from 'react';
 
 function App() {
@@ -18,26 +19,22 @@ function App() {
             
             // Добавляем первый элемент
             setlogElements([
-                <Typography.Body key="webapp">window.WebApp успешно подключен</Typography.Body>
-            ]);
-            
+                <LogLine timestamp={new Date().toLocaleString()} label='Info' body='window.WebApp успешно подключен'/>
+            ]);            
             window.WebApp.requestContact()
                 .then(({phone}) => {
                     localStorage.setItem('phone', phone);
                     setPhoneNumber(phone);
-                    // Добавляем второй элемент
                     setlogElements(prev => [
                         ...prev,
-                        <Typography.Body key="phone">Телефон: {phone}</Typography.Body>
+                        <LogLine timestamp={new Date().toLocaleString()} label='Info' body='Телефон: {phone}'/>
                     ]);
                 })
                 .catch(error => {
                     console.error("Ошибка запроса контакта:", error);
                     setlogElements(prev => [
                         ...prev,
-                        <Typography.Body key="error" style={{ color: 'red' }}>
-                            Ошибка получения телефона
-                        </Typography.Body>
+                        <LogLine timestamp={new Date().toLocaleString()} label='Error' body='Ошибка получения телефона'/>
                     ]);
                     hasRequested.current = false;
                 });
@@ -50,7 +47,9 @@ function App() {
                 <Arrival warehouseName="ворота" />
             </Panel>
             <DevBox>
-                {logElements}
+                <Flex direction='column'>
+                    {logElements}
+                </Flex>
             </DevBox>
         </Container>
     );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Panel, Grid, Container, Flex, Avatar, Typography, Button } from '@maxhub/max-ui';
+import { Panel, Container, Typography, Button } from '@maxhub/max-ui';
 import './DevBox.css'; 
 
 export function DevBox ({ children, defaultExpanded = true, visibility = true }) {
@@ -32,12 +32,7 @@ export function DevBox ({ children, defaultExpanded = true, visibility = true })
                     </Button>
                 </Typography.Title>
             </Container>
-            
-            {isExpanded && (
-                <div className="floating-panel-content">
-                    {children}
-                </div>
-            )}
+            {children}
         </Panel>
     );
 };
