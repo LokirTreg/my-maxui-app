@@ -13,7 +13,7 @@ function App() {
 
     useEffect(() => {
         if (hasRequested.current) return;
-        var t = window.WebApp.DeviceStorage.getItem('phone')
+        let t = window.WebApp.DeviceStorage.getItem('phone')
         if (t){
             setlogElements(prev => [
                 ...prev,
