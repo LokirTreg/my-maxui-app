@@ -15,20 +15,21 @@ function App() {
         if (hasRequested.current) return;
         if(window.WebApp.DeviceStorage)
         {
-        if(window.WebApp.DeviceStorage)
-        {
-            setlogElements(prev => [
-                ...prev,
-                <LogLine timestamp={new Date().toLocaleString()} label='Info' body={'window.WebApp.DeviceStorage подключен'}/>
-            ]);  
-            window.WebApp.DeviceStorage.getItem('phone').then((result) => {
-                if (result){
-                    setlogElements(prev => [
-                        ...prev,
-                        <LogLine timestamp={new Date().toLocaleString()} label='Info' body={`Телефон был сохранен ранее:  {result.value} по ключу {result.key}` }/>
-                    ]);           
-                }
-            })
+            if(window.WebApp.DeviceStorage)
+            {
+                setlogElements(prev => [
+                    ...prev,
+                    <LogLine timestamp={new Date().toLocaleString()} label='Info' body={'window.WebApp.DeviceStorage подключен'}/>
+                ]);  
+                window.WebApp.DeviceStorage.getItem('phone').then((result) => {
+                    if (result){
+                        setlogElements(prev => [
+                            ...prev,
+                            <LogLine timestamp={new Date().toLocaleString()} label='Info' body={`Телефон был сохранен ранее:  {result.value} по ключу {result.key}` }/>
+                        ]);           
+                    }
+                })
+            }
         }
 
         if (window.WebApp && !hasRequested.current) {
