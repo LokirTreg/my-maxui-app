@@ -27,7 +27,7 @@ function App() {
                     setPhoneNumber(phone);
                     setlogElements(prev => [
                         ...prev,
-                        <LogLine timestamp={new Date().toLocaleString()} label='Info' body='Телефон: {phone}'/>
+                        <LogLine timestamp={new Date().toLocaleString()} label='Info' body={'Телефон: ' + phone}/>
                     ]);
                 })
                 .catch(error => {
