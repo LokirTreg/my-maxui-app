@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 
 function App() {
     const { webApp, user } = useMaxWebApp();
-    const [infoElements, setInfoElements] = useState([]); // Массив элементов
+    const [logElements, setlogElements] = useState([]); // Массив элементов
     const [phoneNumber, setPhoneNumber] = useState("");
     const hasRequested = useRef(false);
 
@@ -17,7 +17,7 @@ function App() {
             hasRequested.current = true;
             
             // Добавляем первый элемент
-            setInfoElements([
+            setlogElements([
                 <Typography.Body key="webapp">window.WebApp успешно подключен</Typography.Body>
             ]);
             
@@ -26,14 +26,14 @@ function App() {
                     localStorage.setItem('phone', phone);
                     setPhoneNumber(phone);
                     // Добавляем второй элемент
-                    setInfoElements(prev => [
+                    setlogElements(prev => [
                         ...prev,
                         <Typography.Body key="phone">Телефон: {phone}</Typography.Body>
                     ]);
                 })
                 .catch(error => {
                     console.error("Ошибка запроса контакта:", error);
-                    setInfoElements(prev => [
+                    setlogElements(prev => [
                         ...prev,
                         <Typography.Body key="error" style={{ color: 'red' }}>
                             Ошибка получения телефона
@@ -50,7 +50,7 @@ function App() {
                 <Arrival warehouseName="ворота" />
             </Panel>
             <DevBox>
-                infoElements
+                {logElements}
             </DevBox>
         </Container>
     );
