@@ -25,7 +25,7 @@ function App() {
                     if (result){
                         setlogElements(prev => [
                             ...prev,
-                            <LogLine timestamp={new Date().toLocaleString()} label='Info' body={`Телефон был сохранен ранее:  ${result.value} по ключу $6{result.key}` }/>
+                            <LogLine timestamp={new Date().toLocaleString()} label='Info' body={`Телефон был сохранен ранее:  ${result.value} по ключу ${result.key}` }/>
                         ]);           
                     }
                 })
@@ -60,7 +60,7 @@ function App() {
     }, [webApp, user]);
 
     return (
-        <Container>
+        <Container className="panel">
             <Panel className="panel">
                 <Arrival warehouseName="ворота" />
             </Panel>
