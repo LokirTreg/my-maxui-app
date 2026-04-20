@@ -15,6 +15,8 @@ function App() {
         if (hasRequested.current) return;
         if(window.WebApp.DeviceStorage)
         {
+        if(window.WebApp.DeviceStorage)
+        {
             setlogElements(prev => [
                 ...prev,
                 <LogLine timestamp={new Date().toLocaleString()} label='Info' body={'window.WebApp.DeviceStorage подключен'}/>
