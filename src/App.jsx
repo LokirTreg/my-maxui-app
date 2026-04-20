@@ -13,13 +13,22 @@ function App() {
 
     useEffect(() => {
         if (hasRequested.current) return;
-        let t = window.WebApp.DeviceStorage.getItem('phone')
-        if (t){
+        if(window.WebApp.DeviceStorage)
+        {
             setlogElements(prev => [
                 ...prev,
-                <LogLine timestamp={new Date().toLocaleString()} label='Info' body={'Телефон был сохранен ранее: ' + phone}/>
-            ]);           
+                <LogLine timestamp={new Date().toLocaleString()} label='Info' body={'window.WebApp.DeviceStorage подключен'}/>
+            ]);  
+            window.WebApp.DeviceStorage.getItem('phone').then((result) => {
+                if (result){
+                    setlogElements(prev => [
+                        ...prev,
+                        <LogLine timestamp={new Date().toLocaleString()} label='Info' body={`Телефон был сохранен ранее:  {result.value} по ключу {result.key}` }/>
+                    ]);           
+                }
+            })
         }
+
         if (window.WebApp && !hasRequested.current) {
             hasRequested.current = true;
             
