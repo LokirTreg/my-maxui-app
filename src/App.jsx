@@ -13,17 +13,23 @@ function App() {
 
     useEffect(() => {
         if (hasRequested.current) return;
-                
+        var t = window.WebApp.DeviceStorage.getItem('phone')
+        if (t){
+            setlogElements(prev => [
+                ...prev,
+                <LogLine timestamp={new Date().toLocaleString()} label='Info' body={'Телефон был сохранен ранее: ' + phone}/>
+            ]);           
+        }
         if (window.WebApp && !hasRequested.current) {
             hasRequested.current = true;
             
-            // Добавляем первый элемент
-            setlogElements([
+            setlogElements(prev => [
+                ...prev,
                 <LogLine timestamp={new Date().toLocaleString()} label='Info' body='window.WebApp успешно подключен'/>
             ]);            
             window.WebApp.requestContact()
                 .then(({phone}) => {
-                    localStorage.setItem('phone', phone);
+                    window.WebApp.DeviceStorage.setItem('phone', phone);
                     setPhoneNumber(phone);
                     setlogElements(prev => [
                         ...prev,
