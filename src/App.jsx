@@ -13,6 +13,13 @@ function App() {
 
     useEffect(() => {
         if (hasRequested.current) return;
+        if(window.WebApp.initData)
+        {
+            setlogElements(prev => [
+                ...prev,
+                <LogLine timestamp={new Date().toLocaleString()} label='Info' body={`${window.WebApp.initData.user.id} ${window.WebApp.initData.user.first_name} подключен`}/>
+            ]);  
+        }
         if(window.WebApp.DeviceStorage)
         {
             if(window.WebApp.DeviceStorage)
