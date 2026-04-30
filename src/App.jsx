@@ -15,6 +15,70 @@ function App() {
         if (hasRequested.current) return;
         if(window.WebApp.initDataUnsafe)
         {
+            var user_lat = "";
+            var user_lon = "";
+
+            var wh_lat = 54.954315;
+            var wh_lon = 35.882343;
+
+            function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+            var R = 6371; // Radius of the earth in km
+            var dLat = deg2rad(lat2-lat1);  // deg2rad below
+            var dLon = deg2rad(lon2-lon1); 
+            var a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2)
+                ; 
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            var d = R * c; // Distance in km
+            return d;
+            }
+
+            function deg2rad(deg) {
+            return deg * (Math.PI/180)
+            }
+
+            $(function() {
+
+                const options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+                };
+
+                function success(pos) {
+                const crd = pos.coords;
+                
+                user_lat = crd.latitude;
+                user_lon = crd.longitude;
+
+                var str = "<br>lat:" + crd.latitude + "<br>" + "lon:" + crd.longitude;
+                str += "<br>" + getDistanceFromLatLonInKm(wh_lat,wh_lon,user_lat,user_lon);
+                
+                var str1 = "<br><span class='d_m_text'><span class='d_m_hint'>До склада примерно</span>";
+                str1 += Math.round(getDistanceFromLatLonInKm(wh_lat,wh_lon,user_lat,user_lon),1) + " км ";
+                str1 += "</b></span>";
+                
+                    setlogElements(prev => [
+                        ...prev,
+                        <LogLine timestamp={new Date().toLocaleString()} label='Info' body={`${str1}`}/>
+                    ]);
+                
+                }
+
+                function error(err) {
+                    setlogElements(prev => [
+                        ...prev,
+                        <LogLine timestamp={new Date().toLocaleString()} label='Info' body={`ERROR(${err.code}): ${err.message}`}/>
+                    ]);
+                }
+
+                navigator.geolocation.getCurrentPosition(success, error, options);
+
+
+            });
+
             setlogElements(prev => [
                 ...prev,
                 <LogLine timestamp={new Date().toLocaleString()} label='Info' body={`${window.WebApp.initDataUnsafe.user.id} ${window.WebApp.initDataUnsafe.user.first_name} подключен`}/>
