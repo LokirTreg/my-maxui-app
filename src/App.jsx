@@ -1,4 +1,4 @@
-import { Panel, Container, Flex, Button } from '@maxhub/max-ui';
+import { Panel, Container, Flex, Button, Typography } from '@maxhub/max-ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useMaxWebApp } from './hooks/1';
@@ -36,6 +36,9 @@ function App() {
     const { webApp, user } = useMaxWebApp();
 
     const [logs, setLogs] = useState([]);
+    const [geoStatus, setGeoStatus] = useState('');
+    const [geoBlocked, setGeoBlocked] = useState(false);
+
     const hasRequestedContact = useRef(false);
 
     const addLog = useCallback((label, body) => {
@@ -62,10 +65,72 @@ function App() {
         return null;
     }, [webApp]);
 
-    const requestUserLocation = useCallback(() => {
-        if (!navigator.geolocation) {
-            addLog('Error', 'Геолокация не поддерживается браузером');
+    const openExternalBrowser = useCallback(() => {
+        const app = getApp();
+        const currentUrl = window.location.href;
+
+        if (app?.openLink) {
+            app.openLink(currentUrl);
             return;
+        }
+
+        window.open(currentUrl, '_blank', 'noopener,noreferrer');
+    }, [getApp]);
+
+    const requestUserLocation = useCallback(async () => {
+        setGeoBlocked(false);
+        setGeoStatus('');
+
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        if (!window.isSecureContext) {
+            const message =
+                'Геолокация работает только через HTTPS. Открой мини-приложение по HTTPS-домену.';
+
+            setGeoStatus(message);
+            setGeoBlocked(true);
+            addLog('Error', message);
+            return;
+        }
+
+        if (!navigator.geolocation) {
+            const message = 'Геолокация не поддерживается этим WebView';
+
+            setGeoStatus(message);
+            setGeoBlocked(true);
+            addLog('Error', message);
+            return;
+        }
+
+        try {
+            if (navigator.permissions?.query) {
+                const permission = await navigator.permissions.query({
+                    name: 'geolocation',
+                });
+
+                addLog(
+                    'Info',
+                    `Статус разрешения геолокации: ${permission.state}`
+                );
+
+                if (permission.state === 'denied') {
+                    const message =
+                        'Доступ к геопозиции уже запрещён. Нужно открыть настройки приложения MAX и разрешить геолокацию.';
+
+                    setGeoStatus(message);
+                    setGeoBlocked(true);
+                    addLog('Error', message);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.warn('Не удалось проверить permissions API:', error);
+            addLog(
+                'Info',
+                'Permissions API недоступен, пробуем запросить геопозицию напрямую'
+            );
         }
 
         addLog('Info', 'Запрашиваем геопозицию пользователя');
@@ -79,6 +144,12 @@ function App() {
                     WAREHOUSE_COORDS.lon,
                     latitude,
                     longitude
+                );
+
+                setGeoStatus(
+                    `Геопозиция получена. До склада примерно ${distanceKm.toFixed(
+                        1
+                    )} км`
                 );
 
                 addLog(
@@ -97,16 +168,20 @@ function App() {
                 let message = 'Не удалось получить геопозицию';
 
                 if (error.code === error.PERMISSION_DENIED) {
-                    message = 'Пользователь запретил доступ к геопозиции';
+                    message =
+                        'Доступ к геопозиции запрещён или MAX не показал окно разрешения';
                 }
 
                 if (error.code === error.POSITION_UNAVAILABLE) {
-                    message = 'Геопозиция недоступна';
+                    message = 'Геопозиция недоступна на устройстве';
                 }
 
                 if (error.code === error.TIMEOUT) {
                     message = 'Истекло время ожидания геопозиции';
                 }
+
+                setGeoStatus(message);
+                setGeoBlocked(true);
 
                 addLog('Error', `${message}: ${error.message}`);
             },
@@ -151,7 +226,10 @@ function App() {
                     }
                 })
                 .catch((error) => {
-                    console.error('Ошибка чтения телефона из DeviceStorage:', error);
+                    console.error(
+                        'Ошибка чтения телефона из DeviceStorage:',
+                        error
+                    );
                     addLog('Error', 'Ошибка чтения телефона из DeviceStorage');
                 });
         } else {
@@ -193,15 +271,39 @@ function App() {
                 hasRequestedContact.current = false;
             });
     }, [addLog, getApp, user]);
-
     return (
         <Container className="panel">
             <Panel className="panel">
                 <Arrival warehouseName="ворота" />
 
-                <Button onClick={requestUserLocation}>
-                    Получить геопозицию
-                </Button>
+                <Flex direction="column" gap={8}>
+                    <Button onClick={requestUserLocation}>
+                        Получить геопозицию
+                    </Button>
+
+                    {geoStatus && (
+                        <Typography>
+                            {geoStatus}
+                        </Typography>
+                    )}
+
+                    {geoBlocked && (
+                        <Flex direction="column" gap={8}>
+                            <Typography>
+                                Если окно разрешения не появляется, проверь:
+                                приложение MAX должно иметь доступ к геопозиции
+                                в настройках телефона. Если внутри MAX WebView
+                                разрешить всё равно нельзя, открой страницу во
+                                внешнем браузере или используй запрос геопозиции
+                                через чат-бота.
+                            </Typography>
+
+                            <Button onClick={openExternalBrowser}>
+                                Открыть во внешнем браузере
+                            </Button>
+                        </Flex>
+                    )}
+                </Flex>
             </Panel>
 
             <DevBox>
