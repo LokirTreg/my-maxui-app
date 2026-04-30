@@ -1,5 +1,5 @@
-import { Panel, Container, Flex } from '@maxhub/max-ui';
-import { useEffect, useRef, useState } from 'react';
+import { Panel, Container, Flex, Button } from '@maxhub/max-ui';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useMaxWebApp } from './hooks/1';
 import { Arrival } from './pages/Arrival';
@@ -17,6 +17,7 @@ function deg2rad(deg) {
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
+
     const dLat = deg2rad(lat2 - lat1);
     const dLon = deg2rad(lon2 - lon1);
 
@@ -35,9 +36,9 @@ function App() {
     const { webApp, user } = useMaxWebApp();
 
     const [logs, setLogs] = useState([]);
-    const hasRequested = useRef(false);
+    const hasRequestedContact = useRef(false);
 
-    const addLog = (label, body) => {
+    const addLog = useCallback((label, body) => {
         setLogs((prev) => [
             ...prev,
             {
@@ -47,18 +48,84 @@ function App() {
                 body,
             },
         ]);
-    };
+    }, []);
 
-    useEffect(() => {
-        const app =
-            webApp ??
-            (typeof window !== 'undefined' ? window.WebApp : undefined);
+    const getApp = useCallback(() => {
+        if (webApp) {
+            return webApp;
+        }
 
-        if (!app || hasRequested.current) {
+        if (typeof window !== 'undefined' && window.WebApp) {
+            return window.WebApp;
+        }
+
+        return null;
+    }, [webApp]);
+
+    const requestUserLocation = useCallback(() => {
+        if (!navigator.geolocation) {
+            addLog('Error', 'Геолокация не поддерживается браузером');
             return;
         }
 
-        hasRequested.current = true;
+        addLog('Info', 'Запрашиваем геопозицию пользователя');
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude, accuracy } = position.coords;
+
+                const distanceKm = getDistanceFromLatLonInKm(
+                    WAREHOUSE_COORDS.lat,
+                    WAREHOUSE_COORDS.lon,
+                    latitude,
+                    longitude
+                );
+
+                addLog(
+                    'Info',
+                    `Геопозиция получена: lat=${latitude}, lon=${longitude}, точность=${Math.round(
+                        accuracy
+                    )} м`
+                );
+
+                addLog(
+                    'Info',
+                    `До склада примерно ${distanceKm.toFixed(1)} км`
+                );
+            },
+            (error) => {
+                let message = 'Не удалось получить геопозицию';
+
+                if (error.code === error.PERMISSION_DENIED) {
+                    message = 'Пользователь запретил доступ к геопозиции';
+                }
+
+                if (error.code === error.POSITION_UNAVAILABLE) {
+                    message = 'Геопозиция недоступна';
+                }
+
+                if (error.code === error.TIMEOUT) {
+                    message = 'Истекло время ожидания геопозиции';
+                }
+
+                addLog('Error', `${message}: ${error.message}`);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0,
+            }
+        );
+    }, [addLog]);
+
+    useEffect(() => {
+        const app = getApp();
+
+        if (!app || hasRequestedContact.current) {
+            return;
+        }
+
+        hasRequestedContact.current = true;
 
         addLog('Info', 'window.WebApp успешно подключен');
 
@@ -87,80 +154,54 @@ function App() {
                     console.error('Ошибка чтения телефона из DeviceStorage:', error);
                     addLog('Error', 'Ошибка чтения телефона из DeviceStorage');
                 });
+        } else {
+            addLog('Info', 'window.WebApp.DeviceStorage недоступен');
         }
 
-        if (navigator.geolocation) {
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0,
-            };
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-
-                    const distanceKm = getDistanceFromLatLonInKm(
-                        WAREHOUSE_COORDS.lat,
-                        WAREHOUSE_COORDS.lon,
-                        latitude,
-                        longitude
-                    );
-
-                    addLog(
-                        'Info',
-                        `До склада примерно ${distanceKm.toFixed(1)} км`
-                    );
-                },
-                (error) => {
-                    addLog(
-                        'Error',
-                        `Ошибка геолокации: ERROR(${error.code}): ${error.message}`
-                    );
-                },
-                options
-            );
-        } else {
-            addLog('Error', 'Геолокация не поддерживается браузером');
-        }
-
-        if (typeof app.requestContact === 'function') {
-            app.requestContact()
-                .then(async (contact) => {
-                    const phone = contact?.phone;
-
-                    if (!phone) {
-                        addLog('Error', 'Телефон не был получен');
-                        return;
-                    }
-
-                    addLog('Info', `Телефон: ${phone}`);
-
-                    if (app.DeviceStorage) {
-                        try {
-                            await app.DeviceStorage.setItem('phone', phone);
-                            addLog('Info', 'Телефон сохранен в DeviceStorage');
-                        } catch (error) {
-                            console.error('Ошибка сохранения телефона:', error);
-                            addLog('Error', 'Ошибка сохранения телефона');
-                        }
-                    }
-                })
-                .catch((error) => {
-                    console.error('Ошибка запроса контакта:', error);
-                    addLog('Error', 'Ошибка получения телефона');
-
-                    hasRequested.current = false;
-                });
-        } else {
+        if (typeof app.requestContact !== 'function') {
             addLog('Error', 'Метод requestContact недоступен');
+            return;
         }
-    }, [webApp, user]);
+
+        app.requestContact()
+            .then(async (contact) => {
+                const phone = contact?.phone;
+
+                if (!phone) {
+                    addLog('Error', 'Телефон не был получен');
+                    return;
+                }
+
+                addLog('Info', `Телефон: ${phone}`);
+
+                if (!app.DeviceStorage) {
+                    return;
+                }
+
+                try {
+                    await app.DeviceStorage.setItem('phone', phone);
+                    addLog('Info', 'Телефон сохранен в DeviceStorage');
+                } catch (error) {
+                    console.error('Ошибка сохранения телефона:', error);
+                    addLog('Error', 'Ошибка сохранения телефона');
+                }
+            })
+            .catch((error) => {
+                console.error('Ошибка запроса контакта:', error);
+                addLog('Error', 'Ошибка получения телефона');
+
+                hasRequestedContact.current = false;
+            });
+    }, [addLog, getApp, user]);
 
     return (
         <Container className="panel">
             <Panel className="panel">
                 <Arrival warehouseName="ворота" />
+
+                <Button onClick={requestUserLocation}>
+                    Получить геопозицию
+                </Button>
             </Panel>
 
             <DevBox>
