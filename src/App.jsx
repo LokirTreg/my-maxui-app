@@ -5,6 +5,7 @@ import { useMaxWebApp } from './hooks/1';
 import { Arrival } from './pages/Arrival';
 import { DevBox } from './elements/DevBox';
 import { LogLine } from './elements/LogLine';
+import { isAdminUser, requestAdminUsers } from './adminUsers';
 
 const WAREHOUSE_COORDS = {
     lat: 54.954315,
@@ -38,6 +39,8 @@ function App() {
     const [logs, setLogs] = useState([]);
     const [geoStatus, setGeoStatus] = useState('');
     const [geoBlocked, setGeoBlocked] = useState(false);
+    const [phone, setPhone] = useState('');
+    const [adminUsers, setAdminUsers] = useState([]);
 
     const hasRequestedContact = useRef(false);
 
@@ -76,6 +79,14 @@ function App() {
 
         window.open(currentUrl, '_blank', 'noopener,noreferrer');
     }, [getApp]);
+
+    useEffect(() => {
+        requestAdminUsers()
+            .then(setAdminUsers)
+            .catch((error) => {
+                console.error('Ошибка запроса списка админов:', error);
+            });
+    }, []);
 
     const requestUserLocation = useCallback(async () => {
         setGeoBlocked(false);
@@ -219,6 +230,8 @@ function App() {
             app.DeviceStorage.getItem('phone')
                 .then((result) => {
                     if (result?.value) {
+                        setPhone(result.value);
+
                         addLog(
                             'Info',
                             `Телефон был сохранен ранее: ${result.value} по ключу ${result.key}`
@@ -251,6 +264,7 @@ function App() {
                 }
 
                 addLog('Info', `Телефон: ${phone}`);
+                setPhone(phone);
 
                 if (!app.DeviceStorage) {
                     return;
@@ -271,6 +285,13 @@ function App() {
                 hasRequestedContact.current = false;
             });
     }, [addLog, getApp, user]);
+
+    const canShowDevBox = isAdminUser({
+        user,
+        phone,
+        admins: adminUsers,
+    });
+
     return (
         <Container className="panel">
             <Panel className="panel">
@@ -306,7 +327,7 @@ function App() {
                 </Flex>
             </Panel>
 
-            <DevBox>
+            <DevBox visibility={canShowDevBox}>
                 <Flex direction="column">
                     {logs.map((log) => (
                         <LogLine
