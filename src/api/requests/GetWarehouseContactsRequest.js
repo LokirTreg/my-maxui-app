@@ -12,6 +12,10 @@ export class GetWarehouseContactsRequest extends ProcessApiRequest {
         return 'get_warehouse_contacts';
     }
 
+    get method() {
+        return 'GET';
+    }
+
     getMockFailureKey() {
         return this.params.tvsId;
     }

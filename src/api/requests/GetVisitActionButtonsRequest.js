@@ -12,6 +12,10 @@ export class GetVisitActionButtonsRequest extends ProcessApiRequest {
         return 'get_visit_action_buttons';
     }
 
+    get method() {
+        return 'GET';
+    }
+    
     getMockFailureKey() {
         return this.params.tvsId;
     }
