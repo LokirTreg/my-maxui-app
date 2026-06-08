@@ -414,6 +414,18 @@ a {
     background: #2563eb;
 }
 
+.dev-log-label.log {
+    background: #475569;
+}
+
+.dev-log-label.debug {
+    background: #64748b;
+}
+
+.dev-log-label.warn {
+    background: #b45309;
+}
+
 .dev-log-label.action {
     background: #16825d;
 }

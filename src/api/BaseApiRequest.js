@@ -110,10 +110,11 @@ export class BaseApiRequest {
         const baseUrl = this.options.baseUrl || '';
         const url = new URL(this.endpoint, baseUrl || window.location.origin);
 
-        console.log('Built URL:', url.toString());
         query.forEach((value, key) => {
             url.searchParams.set(key, value);
         });
+
+        console.log('Built URL:', url.toString());
 
         return url.toString();
     }

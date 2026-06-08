@@ -1,3 +1,4 @@
+import './logs/installConsoleCapture';
 import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
 import { MaxUI } from '@maxhub/max-ui';
