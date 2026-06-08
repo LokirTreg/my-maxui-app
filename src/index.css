@@ -251,6 +251,10 @@ a {
     color: #9f2525;
 }
 
+.state p {
+    overflow-wrap: anywhere;
+}
+
 .loading-dot {
     width: 10px;
     height: 10px;

@@ -43,6 +43,16 @@ export class GetWarehouseContactsRequest extends ProcessApiRequest {
         };
     }
 
+    transformEnvelopeData(data) {
+        if (Array.isArray(data)) {
+            return {
+                fields: data,
+            };
+        }
+
+        return data;
+    }
+
     validateResponse(response) {
         assertObject(response, 'getWarehouseContacts.response');
         assertArray(response.fields, 'getWarehouseContacts.response.fields');

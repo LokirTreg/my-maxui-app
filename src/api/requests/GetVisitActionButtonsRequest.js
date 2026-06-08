@@ -36,6 +36,16 @@ export class GetVisitActionButtonsRequest extends ProcessApiRequest {
         };
     }
 
+    transformEnvelopeData(data) {
+        if (Array.isArray(data)) {
+            return {
+                buttons: data,
+            };
+        }
+
+        return data;
+    }
+
     validateResponse(response) {
         assertObject(response, 'getVisitActionButtons.response');
         assertArray(response.buttons, 'getVisitActionButtons.response.buttons');

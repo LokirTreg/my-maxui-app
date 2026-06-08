@@ -6,11 +6,49 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const getRandomDelay = (min, max) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
+const isObject = (value) =>
+    Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+
+const DETAILS_LIMIT = 1200;
+
+const truncate = (value, limit = DETAILS_LIMIT) => {
+    if (value.length <= limit) {
+        return value;
+    }
+
+    return `${value.slice(0, limit)}...`;
+};
+
+const stringifyDetailsValue = (value) => {
+    if (value === undefined) {
+        return '';
+    }
+
+    if (typeof value === 'string') {
+        return truncate(value);
+    }
+
+    try {
+        return truncate(JSON.stringify(value));
+    } catch {
+        return String(value);
+    }
+};
+
 export class ApiValidationError extends Error {
     constructor(message, details = {}) {
         super(message);
         this.name = 'ApiValidationError';
         this.details = details;
+    }
+}
+
+export class ApiRequestError extends Error {
+    constructor(message, details = {}, cause) {
+        super(message);
+        this.name = 'ApiRequestError';
+        this.details = details;
+        this.cause = cause;
     }
 }
 
@@ -35,15 +73,26 @@ export class BaseApiRequest {
 
     async execute() {
         this.validateParams(this.params);
-        console.log(this.options.mode)
-        const response =
+        console.log('Request mode:', this.options.mode);
+
+        const rawResponse =
             this.options.mode === 'http'
-                ? await this.fetchResponse()
+                ? this.readEnvelopeResponse(await this.fetchResponse())
                 : await this.mockResponse();
 
-        this.validateResponse(response);
+        try {
+            this.validateResponse(rawResponse);
+        } catch (error) {
+            throw this.createRequestError(
+                'API data не прошла валидацию',
+                {
+                    data: rawResponse,
+                },
+                error
+            );
+        }
 
-        return this.transformResponse(response);
+        return this.transformResponse(rawResponse);
     }
 
     validateParams() {}
@@ -52,6 +101,10 @@ export class BaseApiRequest {
 
     transformResponse(response) {
         return response;
+    }
+
+    transformEnvelopeData(data) {
+        return data;
     }
 
     buildQuery() {
@@ -92,17 +145,151 @@ export class BaseApiRequest {
     async fetchResponse() {
         const url = this.buildUrl();
         const body = this.buildBody();
-        const response = await fetch(url, {
-            body,
-            headers: this.buildHeaders(),
-            method: this.method,
-        });
+        console.log('Fetching URL:', url);
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        let response;
+
+        try {
+            response = await fetch(url, {
+                body,
+                headers: this.buildHeaders(),
+                method: this.method,
+            });
+        } catch (error) {
+            throw this.createRequestError(
+                'HTTP запрос не выполнен',
+                {
+                    hint: this.getFetchFailureHint(error),
+                    url,
+                },
+                error
+            );
         }
 
-        return response.json();
+        const responseText = await response.text();
+
+        if (!response.ok) {
+            throw this.createRequestError('HTTP ответ с ошибкой', {
+                body: responseText,
+                status: response.status,
+                statusText: response.statusText,
+                url,
+            });
+        }
+
+        try {
+            return responseText ? JSON.parse(responseText) : null;
+        } catch (error) {
+            throw this.createRequestError(
+                'API вернул невалидный JSON',
+                {
+                    body: responseText,
+                    url,
+                },
+                error
+            );
+        }
+    }
+
+    readEnvelopeResponse(response) {
+        try {
+            this.validateEnvelopeResponse(response);
+        } catch (error) {
+            throw this.createRequestError(
+                'API вернул неожиданный формат envelope',
+                {
+                    response,
+                },
+                error
+            );
+        }
+
+        if (!response.success) {
+            throw this.createRequestError('API вернул success=false', {
+                apiMessage: response.message,
+                data: response.data,
+                timestamp: response.timestamp,
+            });
+        }
+
+        return this.transformEnvelopeData(response.data, response);
+    }
+
+    createRequestError(title, details = {}, cause) {
+        const requestDetails = this.getRequestDetails(details);
+        const causeMessage =
+            cause instanceof Error ? cause.message : stringifyDetailsValue(cause);
+        const parts = [
+            causeMessage ? `${title}: ${causeMessage}` : title,
+            ...Object.entries(requestDetails)
+                .filter(([, value]) => value !== '')
+                .map(([key, value]) => `${key}=${stringifyDetailsValue(value)}`),
+        ];
+
+        return new ApiRequestError(parts.join(' | '), requestDetails, cause);
+    }
+
+    getRequestDetails(details = {}) {
+        return {
+            request: this.constructor.name,
+            processMethod: this.getOptionalProcessMethod(),
+            httpMethod: this.method,
+            mode: this.options.mode,
+            endpoint: this.endpoint,
+            params: this.params,
+            ...details,
+        };
+    }
+
+    getOptionalProcessMethod() {
+        try {
+            return this.processMethod;
+        } catch {
+            return '';
+        }
+    }
+
+    getFetchFailureHint(error) {
+        if (error instanceof TypeError && error.message === 'Failed to fetch') {
+            return 'Браузер не получил ответ. Частые причины: CORS, недоступный домен, SSL/сертификат, блокировка WebView или отсутствие сети.';
+        }
+
+        return '';
+    }
+
+    validateEnvelopeResponse(response) {
+        if (!isObject(response)) {
+            throw new ApiValidationError('API response должен быть объектом', {
+                response,
+            });
+        }
+
+        if (typeof response.success !== 'boolean') {
+            throw new ApiValidationError(
+                'API response.success должен быть boolean',
+                { response }
+            );
+        }
+
+        if (typeof response.message !== 'string') {
+            throw new ApiValidationError(
+                'API response.message должен быть строкой',
+                { response }
+            );
+        }
+
+        if (typeof response.timestamp !== 'string') {
+            throw new ApiValidationError(
+                'API response.timestamp должен быть строкой',
+                { response }
+            );
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(response, 'data')) {
+            throw new ApiValidationError('API response.data отсутствует', {
+                response,
+            });
+        }
     }
 
     buildUrl() {

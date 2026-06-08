@@ -12,6 +12,10 @@ export class GetVisitFieldsRequest extends ProcessApiRequest {
         return 'get_visit_fields';
     }
 
+    get method() {
+        return 'GET';
+    }
+
     getMockFailureKey() {
         return this.params.tvsId;
     }
@@ -53,6 +57,16 @@ export class GetVisitFieldsRequest extends ProcessApiRequest {
                 },
             ],
         };
+    }
+
+    transformEnvelopeData(data) {
+        if (Array.isArray(data)) {
+            return {
+                fields: data,
+            };
+        }
+
+        return data;
     }
 
     validateResponse(response) {

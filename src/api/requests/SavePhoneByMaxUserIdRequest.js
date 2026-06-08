@@ -25,6 +25,15 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
         );
     }
 
+    transformEnvelopeData(data, envelope) {
+        const normalizedData = Array.isArray(data) ? data[0] : data;
+
+        return {
+            ok: Boolean(normalizedData?.ok ?? envelope.success),
+            phone: String(normalizedData?.phone ?? this.params.phone ?? ''),
+        };
+    }
+
     validateResponse(response) {
         assertObject(response, 'savePhoneByMaxUserId.response');
         assertBoolean(response.ok, 'savePhoneByMaxUserId.response.ok');

@@ -23,6 +23,21 @@ const createInitialState = () => ({
     loading: true,
 });
 
+const requestOptions = {
+    mode: 'http',
+};
+
+const getLogErrorMessage = (error, fallback = 'unknown') =>
+    error instanceof Error ? error.message : fallback;
+
+const getUserErrorMessage = (error, fallback) => {
+    if (error instanceof Error && error.name === 'ApiRequestError') {
+        return `${fallback}. Подробности в логах.`;
+    }
+
+    return error instanceof Error ? error.message : fallback;
+};
+
 export function VisitInfo({ title, tvsId }) {
     const navigate = useNavigate();
     const { addLog } = useDevLog();
@@ -52,9 +67,9 @@ export function VisitInfo({ title, tvsId }) {
             try {
                 const [fieldsResult, actionsResult, contactsResult] =
                     await Promise.all([
-                        getVisitFields(tvsId),
-                        getVisitActionButtons(tvsId),
-                        getWarehouseContacts(tvsId),
+                        getVisitFields(tvsId, requestOptions),
+                        getVisitActionButtons(tvsId, requestOptions),
+                        getWarehouseContacts(tvsId, requestOptions),
                     ]);
 
                 if (!isActive) {
@@ -85,19 +100,19 @@ export function VisitInfo({ title, tvsId }) {
                 setState({
                     actions: [],
                     contacts: [],
-                    error:
-                        error instanceof Error
-                            ? error.message
-                            : 'Не удалось загрузить данные визита',
+                    error: getUserErrorMessage(
+                        error,
+                        'Не удалось загрузить данные визита'
+                    ),
                     fields: [],
                     loading: false,
                 });
 
                 addLog(
                     'error',
-                    `Ошибка загрузки визита ${tvsId}: ${
-                        error instanceof Error ? error.message : 'unknown'
-                    }`
+                    `Ошибка загрузки визита ${tvsId}: ${getLogErrorMessage(
+                        error
+                    )}`
                 );
             }
         }
@@ -115,20 +130,17 @@ export function VisitInfo({ title, tvsId }) {
         addLog('action', `executeCallback: ${callback}`);
 
         try {
-            const options = {
-                mode: 'http'
-            };
-            const result = await executeCallback(callback, options);
+            const result = await executeCallback(callback, requestOptions);
             setStatusMessage(result.message);
             addLog('info', `Callback выполнен: ${result.message}`);
         } catch (error) {
-            const message =
-                error instanceof Error
-                    ? error.message
-                    : 'Не удалось выполнить команду';
+            const message = getUserErrorMessage(
+                error,
+                'Не удалось выполнить команду'
+            );
 
             setStatusMessage(message);
-            addLog('error', `Callback ошибка: ${message}`);
+            addLog('error', `Callback ошибка: ${getLogErrorMessage(error)}`);
         } finally {
             setPendingAction(null);
         }

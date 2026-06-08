@@ -43,6 +43,16 @@ export class GetVisitHistoryRequest extends ProcessApiRequest {
         };
     }
 
+    transformEnvelopeData(data) {
+        if (Array.isArray(data)) {
+            return {
+                buttons: data,
+            };
+        }
+
+        return data;
+    }
+
     validateResponse(response) {
         assertObject(response, 'getVisitHistory.response');
         assertArray(response.buttons, 'getVisitHistory.response.buttons');

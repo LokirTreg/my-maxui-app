@@ -29,6 +29,15 @@ export class ExecuteCallbackRequest extends ProcessApiRequest {
         };
     }
 
+    transformEnvelopeData(data, envelope) {
+        const normalizedData = Array.isArray(data) ? data[0] : data;
+
+        return {
+            ok: Boolean(normalizedData?.ok ?? envelope.success),
+            message: String(normalizedData?.message || envelope.message),
+        };
+    }
+
     validateResponse(response) {
         assertObject(response, 'executeCallback.response');
         assertBoolean(response.ok, 'executeCallback.response.ok');

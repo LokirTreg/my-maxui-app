@@ -23,6 +23,32 @@ export class GetPhoneByMaxUserIdRequest extends ProcessApiRequest {
         };
     }
 
+    transformEnvelopeData(data) {
+        if (Array.isArray(data)) {
+            const [firstItem] = data;
+
+            if (typeof firstItem === 'string') {
+                return {
+                    phone: firstItem,
+                };
+            }
+
+            return {
+                phone: String(firstItem?.phone || ''),
+            };
+        }
+
+        if (typeof data === 'string') {
+            return {
+                phone: data,
+            };
+        }
+
+        return {
+            phone: String(data?.phone || ''),
+        };
+    }
+
     validateResponse(response) {
         assertObject(response, 'getPhoneByMaxUserId.response');
         assertString(response.phone, 'getPhoneByMaxUserId.response.phone');
