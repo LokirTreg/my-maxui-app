@@ -35,7 +35,7 @@ export class BaseApiRequest {
 
     async execute() {
         this.validateParams(this.params);
-
+        console.log(this.options.mode)
         const response =
             this.options.mode === 'http'
                 ? await this.fetchResponse()
