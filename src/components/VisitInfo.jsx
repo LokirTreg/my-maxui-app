@@ -115,7 +115,10 @@ export function VisitInfo({ title, tvsId }) {
         addLog('action', `executeCallback: ${callback}`);
 
         try {
-            const result = await executeCallback(callback);
+            const options = {
+                mode: 'http'
+            };
+            const result = await executeCallback(callback, options);
             setStatusMessage(result.message);
             addLog('info', `Callback выполнен: ${result.message}`);
         } catch (error) {
