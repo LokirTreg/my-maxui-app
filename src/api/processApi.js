@@ -16,9 +16,9 @@ export function getPhoneByMaxUserId(maxUserId, options = {}) {
     return new GetPhoneByMaxUserIdRequest({ maxUserId }, options).execute();
 }
 
-export function savePhoneByMaxUserId(maxUserId, phone, options = {}) {
+export function savePhoneByMaxUserId(maxUserId, phone, chatid, options = {}) {
     return new SavePhoneByMaxUserIdRequest(
-        { maxUserId, phone },
+        { maxUserId, phone, chatid },
         options
     ).execute();
 }

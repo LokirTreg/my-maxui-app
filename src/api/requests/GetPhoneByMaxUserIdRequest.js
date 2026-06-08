@@ -7,6 +7,10 @@ export class GetPhoneByMaxUserIdRequest extends ProcessApiRequest {
         return 'get_phone_by_max_user_id';
     }
 
+    get method() {
+        return 'GET';
+    }
+    
     getMockFailureKey() {
         return this.params.maxUserId;
     }

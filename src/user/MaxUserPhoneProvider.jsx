@@ -30,6 +30,10 @@ const getInitUser = () => {
     const webApp = getWebApp();
     return webApp?.initDataUnsafe?.user || null;
 };
+const getChatId = () => {
+    const webApp = getWebApp();
+    return webApp?.initDataUnsafe?.chat?.id || null;
+};
 
 const normalizePhone = (phone) => String(phone || '').replace(/[^\d+]/g, '');
 
@@ -58,7 +62,8 @@ export function MaxUserPhoneProvider({ children }) {
             const initUser = getInitUser();
             const maxUser = initUser || DEV_MAX_USER;
             const maxUserId = String(maxUser?.id || '');
-
+            const chatId = String(getChatId() || '');
+                
             if (!initUser) {
                 addLog(
                     'info',
@@ -84,7 +89,7 @@ export function MaxUserPhoneProvider({ children }) {
 
             try {
                 addLog('info', `Process: запрос телефона для maxUserId ${maxUserId}`);
-                const dbResult = await getPhoneByMaxUserId(maxUserId);
+                const dbResult = await getPhoneByMaxUserId(maxUserId, { mode: 'http' });
                 const dbPhone = normalizePhone(dbResult.phone);
 
                 if (dbPhone) {
@@ -114,7 +119,7 @@ export function MaxUserPhoneProvider({ children }) {
                         throw new Error('MAX Bridge не вернул телефон');
                     }
 
-                    await savePhoneByMaxUserId(maxUserId, bridgePhone);
+                    await savePhoneByMaxUserId(maxUserId, bridgePhone, chatId, { mode: 'http' });
 
                     setState({
                         error: '',
