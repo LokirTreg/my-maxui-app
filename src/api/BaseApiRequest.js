@@ -146,6 +146,7 @@ export class BaseApiRequest {
         const url = this.buildUrl();
         const body = this.buildBody();
         console.log('Fetching URL:', url);
+        console.log('Request body:', body || '<empty>');
 
         let response;
 

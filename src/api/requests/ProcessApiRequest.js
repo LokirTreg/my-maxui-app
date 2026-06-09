@@ -14,9 +14,28 @@ export class ProcessApiRequest extends BaseApiRequest {
     }
 
     buildQuery() {
-        const query = new URLSearchParams(this.buildProcessParams());
+        const query = new URLSearchParams();
         query.set('method', this.processMethod);
+
+        if (this.method !== 'POST') {
+            Object.entries(this.buildProcessParams()).forEach(
+                ([key, value]) => {
+                    query.set(key, value);
+                }
+            );
+        }
+
         return query;
+    }
+
+    buildBody() {
+        if (this.method !== 'POST') {
+            return undefined;
+        }
+
+        return JSON.stringify({
+            data: this.buildProcessParams(),
+        });
     }
 
     buildProcessParams() {
