@@ -16,6 +16,10 @@ const createInitialState = () => ({
     visits: [],
 });
 
+const requestOptions = {
+    mode: 'http',
+};
+
 export function HistoryPage() {
     const navigate = useNavigate();
     const { addLog } = useDevLog();
@@ -48,7 +52,7 @@ export function HistoryPage() {
             }));
 
             try {
-                const result = await getVisitHistory(phone);
+                const result = await getVisitHistory(phone, requestOptions);
 
                 if (!isActive) {
                     return;

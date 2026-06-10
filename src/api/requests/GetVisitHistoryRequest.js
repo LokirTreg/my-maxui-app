@@ -11,6 +11,10 @@ export class GetVisitHistoryRequest extends ProcessApiRequest {
         return 'get_visit_history';
     }
 
+    get method() {
+        return 'GET';
+    }
+
     getMockFailureKey() {
         return this.params.phone;
     }
