@@ -286,7 +286,10 @@ export class BaseApiRequest {
             );
         }
 
-        if (!Object.prototype.hasOwnProperty.call(response, 'data')) {
+        if (
+            response.success &&
+            !Object.prototype.hasOwnProperty.call(response, 'data')
+        ) {
             throw new ApiValidationError('API response.data отсутствует', {
                 response,
             });

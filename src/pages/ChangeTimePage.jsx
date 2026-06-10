@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { ErrorMessage } from '../components/ErrorMessage';
+import { EmptyState } from '../components/EmptyState';
 import { Layout } from '../components/Layout';
 import { Loading } from '../components/Loading';
 import { useDevLog } from '../logs/useDevLog';
@@ -18,7 +19,7 @@ export function ChangeTimePage() {
         retry,
     } = useMaxUserPhone();
     const [searchParams] = useSearchParams();
-    const tvsId = searchParams.get('tvsid') || '123';
+    const tvsId = searchParams.get('tvsid') || '';
 
     useEffect(() => {
         let isActive = true;
@@ -46,7 +47,7 @@ export function ChangeTimePage() {
                         Перенос времени
                     </h1>
                     <p className="page-description">
-                        Визит #{tvsId}
+                        {tvsId ? `Визит #${tvsId}` : 'ID визита не передан'}
                     </p>
                 </div>
             </div>
@@ -60,13 +61,17 @@ export function ChangeTimePage() {
                     <ErrorMessage message={phoneError} onRetry={retry} />
                 )}
 
-                {!phoneLoading && !phoneError && (
+                {!phoneLoading && !phoneError && tvsId && (
                     <p className="placeholder-text">
                         Экран переноса времени будет подключен к Process.aspx
                         после появления backend API. Телефон пользователя:
                         {' '}
                         {phone}.
                     </p>
+                )}
+
+                {!phoneLoading && !phoneError && !tvsId && (
+                    <EmptyState text="ID визита не передан" />
                 )}
             </Panel>
 
@@ -84,7 +89,7 @@ export function ChangeTimePage() {
                     className="secondary-button"
                     onClick={() => {
                         addLog('action', 'Домой с экрана переноса времени');
-                        navigate(`/?tvsid=${tvsId}`);
+                        navigate(tvsId ? `/?tvsid=${tvsId}` : '/');
                     }}
                 >
                     Домой

@@ -2,6 +2,7 @@ import { Button, Flex } from '@maxhub/max-ui';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { ErrorMessage } from '../components/ErrorMessage';
+import { EmptyState } from '../components/EmptyState';
 import { Layout } from '../components/Layout';
 import { Loading } from '../components/Loading';
 import { VisitInfo } from '../components/VisitInfo';
@@ -17,7 +18,7 @@ export function VisitPage() {
         loading: phoneLoading,
         retry,
     } = useMaxUserPhone();
-    const tvsId = id || '123';
+    const tvsId = id || '';
 
     return (
         <Layout>
@@ -27,7 +28,7 @@ export function VisitPage() {
                         Выбранный визит
                     </h1>
                     <p className="page-description">
-                        Визит #{tvsId}
+                        {tvsId ? `Визит #${tvsId}` : 'ID визита не передан'}
                     </p>
                 </div>
                 <Flex className="nav-actions" gap={8}>
@@ -48,7 +49,9 @@ export function VisitPage() {
                         onClick={() => {
                             addLog('action', `Домой из визита ${tvsId}`);
                             navigate(
-                                `/?tvsid=${encodeURIComponent(tvsId)}`
+                                tvsId
+                                    ? `/?tvsid=${encodeURIComponent(tvsId)}`
+                                    : '/'
                             );
                         }}
                     >
@@ -63,11 +66,15 @@ export function VisitPage() {
                 <ErrorMessage message={phoneError} onRetry={retry} />
             )}
 
-            {!phoneLoading && !phoneError && (
+            {!phoneLoading && !phoneError && tvsId && (
                 <VisitInfo
                     title={`Информация о визите #${tvsId}`}
                     tvsId={tvsId}
                 />
+            )}
+
+            {!phoneLoading && !phoneError && !tvsId && (
+                <EmptyState text="ID визита не передан" />
             )}
         </Layout>
     );

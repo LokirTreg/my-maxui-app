@@ -1,5 +1,6 @@
 export { ProcessApiRequest } from './requests/ProcessApiRequest';
 export { ExecuteCallbackRequest } from './requests/ExecuteCallbackRequest';
+export { GetActualVisitRequest } from './requests/GetActualVisitRequest';
 export { GetPhoneByMaxUserIdRequest } from './requests/GetPhoneByMaxUserIdRequest';
 export { GetVisitActionButtonsRequest } from './requests/GetVisitActionButtonsRequest';
 export { GetVisitFieldsRequest } from './requests/GetVisitFieldsRequest';

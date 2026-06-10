@@ -1,5 +1,6 @@
 import {
     ExecuteCallbackRequest,
+    GetActualVisitRequest,
     GetPhoneByMaxUserIdRequest,
     GetVisitActionButtonsRequest,
     GetVisitFieldsRequest,
@@ -7,6 +8,10 @@ import {
     GetWarehouseContactsRequest,
     SavePhoneByMaxUserIdRequest,
 } from './processRequests';
+
+export function getActualVisit(phone, maxUserId, options = {}) {
+    return new GetActualVisitRequest({ phone, maxUserId }, options).execute();
+}
 
 export function getVisitActionButtons(tvsId, options = {}) {
     return new GetVisitActionButtonsRequest({ tvsId }, options).execute();
