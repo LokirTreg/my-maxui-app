@@ -30,7 +30,16 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
         const normalizedData = Array.isArray(data) ? data[0] : data;
 
         return {
-            ok: Boolean(normalizedData?.ok ?? envelope.success),
+            ok: Boolean(
+                normalizedData?.ok ??
+                    normalizedData?.Success ??
+                    normalizedData?.success ??
+                    envelope.success
+            ),
+            maxUserId: String(
+                normalizedData?.max_user_id ?? this.params.maxUserId ?? ''
+            ),
+            phone: String(normalizedData?.phone ?? this.params.phone ?? ''),
         };
     }
 
