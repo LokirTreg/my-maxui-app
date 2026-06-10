@@ -15,6 +15,7 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
         return {
             max_user_id: String(this.params.maxUserId || ''),
             phone: String(this.params.phone || ''),
+            chatid: String(this.params.chatid || ''),
         };
     }
 
@@ -30,7 +31,6 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
 
         return {
             ok: Boolean(normalizedData?.ok ?? envelope.success),
-            phone: String(normalizedData?.phone ?? this.params.phone ?? ''),
         };
     }
 
