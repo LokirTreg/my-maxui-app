@@ -10,7 +10,7 @@ import { MaxUserPhoneContext } from './maxUserPhoneContext';
 
 const DEV_MAX_USER = {
     first_name: 'Dev',
-    id: 100500,
+    id: 254022815,
 };
 
 const DEV_PHONE = '79012345678';
