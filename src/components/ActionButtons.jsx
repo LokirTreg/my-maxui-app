@@ -2,10 +2,22 @@ import { Button, Flex } from '@maxhub/max-ui';
 
 import { EmptyState } from './EmptyState';
 
+const getActionKind = (button) => {
+    if (button.type === 'callback') {
+        return 'callback';
+    }
+
+    if (button.type === 'route') {
+        return 'route';
+    }
+
+    return 'unknown';
+};
+
 export function ActionButtons({
     buttons,
     onCallback,
-    onInternal,
+    onNavigate,
     pendingAction,
 }) {
     if (!buttons.length) {
@@ -14,25 +26,31 @@ export function ActionButtons({
 
     return (
         <Flex className="action-list" direction="column" gap={8}>
-            {buttons.map((button, index) => (
-                <Button
-                    className={`action-button ${button.cssclass || ''}`}
-                    disabled={pendingAction !== null}
-                    key={`${button.title}-${index}`}
-                    onClick={() => {
-                        if (button.callback) {
-                            onCallback(button.callback, index);
-                            return;
-                        }
+            {buttons.map((button, index) => {
+                const actionKind = getActionKind(button);
 
-                        if (button.internal) {
-                            onInternal(button.internal);
-                        }
-                    }}
-                >
-                    {pendingAction === index ? 'Выполняем...' : button.title}
-                </Button>
-            ))}
+                return (
+                    <Button
+                        className={`action-button action-button_${actionKind} ${
+                            button.cssclass || ''
+                        }`}
+                        disabled={pendingAction !== null}
+                        key={`${button.title}-${index}`}
+                        onClick={() => {
+                            if (actionKind === 'callback') {
+                                onCallback(button.callback || '', index);
+                                return;
+                            }
+
+                            if (actionKind === 'route') {
+                                onNavigate(button);
+                            }
+                        }}
+                    >
+                        {pendingAction === index ? 'Выполняем...' : button.title}
+                    </Button>
+                );
+            })}
         </Flex>
     );
 }
