@@ -7,6 +7,13 @@ import {
     assertString,
 } from '../validation';
 
+const normalizeButton = (button, index) => ({
+    ...button,
+    title: String(
+        button.title ?? button.text ?? button.label ?? `Действие ${index + 1}`
+    ),
+});
+
 export class GetVisitActionButtonsRequest extends ProcessApiRequest {
     get processMethod() {
         return 'get_visit_action_buttons';
@@ -35,6 +42,13 @@ export class GetVisitActionButtonsRequest extends ProcessApiRequest {
                     title: 'Отменить визит',
                     cssclass: 'btn_blue',
                     callback: `method=cancel_visit&tvsid=${id}`,
+                    type: 'callback',
+                },
+                {
+                    title: 'Перенести время',
+                    cssclass: 'btn_green',
+                    callback: `/change-time?tvsid=${id}`,
+                    type: 'route',
                 },
             ],
         };
@@ -43,11 +57,14 @@ export class GetVisitActionButtonsRequest extends ProcessApiRequest {
     transformEnvelopeData(data) {
         if (Array.isArray(data)) {
             return {
-                buttons: data,
+                buttons: data.map(normalizeButton),
             };
         }
 
-        return data;
+        return {
+            ...data,
+            buttons: (data?.buttons || []).map(normalizeButton),
+        };
     }
 
     validateResponse(response) {
@@ -59,8 +76,10 @@ export class GetVisitActionButtonsRequest extends ProcessApiRequest {
             assertObject(button, path);
             assertString(button.title, `${path}.title`, { allowEmpty: false });
             assertOptionalString(button.cssclass, `${path}.cssclass`);
-            assertOptionalString(button.callback, `${path}.callback`);
-            assertOptionalString(button.internal, `${path}.internal`);
+            assertString(button.callback, `${path}.callback`, {
+                allowEmpty: false,
+            });
+            assertString(button.type, `${path}.type`, { allowEmpty: false });
         });
     }
 }

@@ -189,6 +189,16 @@ a {
     color: #ffffff;
 }
 
+.action-button_callback {
+    box-shadow: inset 4px 0 0 rgba(255, 255, 255, 0.35);
+}
+
+.action-button_route {
+    border: 1px solid #b8d7cd;
+    background: #effbf6;
+    color: #116146;
+}
+
 .secondary-button {
     border: 1px solid #cbd7df;
     background: #ffffff;

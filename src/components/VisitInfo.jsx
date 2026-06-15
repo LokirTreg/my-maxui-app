@@ -8,7 +8,7 @@ import {
     getVisitFields,
     getWarehouseContacts,
 } from '../api/processApi';
-import { getRequestOptions } from '../api/requestOptions';
+import { getRequestOptions, isMockApiMode } from '../api/requestOptions';
 import { ActionButtons } from './ActionButtons';
 import { ErrorMessage } from './ErrorMessage';
 import { Loading } from './Loading';
@@ -35,6 +35,18 @@ const getUserErrorMessage = (error, fallback) => {
     }
 
     return error instanceof Error ? error.message : fallback;
+};
+
+const addMockParam = (path) => {
+    if (!isMockApiMode()) {
+        return path;
+    }
+
+    const [pathname, query = ''] = path.split('?');
+    const params = new URLSearchParams(query);
+    params.set('mock', '1');
+
+    return `${pathname}?${params.toString()}`;
 };
 
 export function VisitInfo({ title, tvsId }) {
@@ -145,15 +157,46 @@ export function VisitInfo({ title, tvsId }) {
         }
     };
 
-    const handleInternal = (internal) => {
-        addLog('action', `internal action: ${internal}`);
+    const buildNavigationPath = (button) => {
+        const rawPath = button.callback || '';
 
-        if (internal === 'changetime') {
+        if (rawPath) {
+            return addMockParam(
+                rawPath.replace('{tvsid}', encodeURIComponent(tvsId))
+            );
+        }
+
+        const page = button.page || button.internal;
+
+        if (page === 'changetime' || page === 'change-time') {
             const params = new URLSearchParams({
                 tvsid: tvsId,
             });
 
-            navigate(`/change-time?${params.toString()}`);
+            if (isMockApiMode()) {
+                params.set('mock', '1');
+            }
+
+            return `/change-time?${params.toString()}`;
+        }
+
+        if (page === 'history') {
+            return addMockParam('/history');
+        }
+
+        if (page === 'home') {
+            return addMockParam(`/?tvsid=${encodeURIComponent(tvsId)}`);
+        }
+
+        return '';
+    };
+
+    const handleNavigate = (button) => {
+        const path = buildNavigationPath(button);
+        addLog('action', `app navigation: ${button.callback || ''}`);
+
+        if (path) {
+            navigate(path);
             return;
         }
 
@@ -180,7 +223,7 @@ export function VisitInfo({ title, tvsId }) {
                 <ActionButtons
                     buttons={state.actions}
                     onCallback={handleCallback}
-                    onInternal={handleInternal}
+                    onNavigate={handleNavigate}
                     pendingAction={pendingAction}
                 />
                 {statusMessage && (
