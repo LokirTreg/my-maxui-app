@@ -305,8 +305,6 @@ export class BaseApiRequest {
             url.searchParams.set(key, value);
         });
 
-        console.log('Built URL:', url.toString());
-
         return url.toString();
     }
 }

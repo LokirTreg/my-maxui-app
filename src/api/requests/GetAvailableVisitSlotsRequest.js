@@ -2,8 +2,8 @@ import { ProcessApiRequest } from './ProcessApiRequest';
 import { assertArray, assertObject, assertString } from '../validation';
 
 const normalizeSlotItem = (item) => ({
-    name: String(item?.name ?? ''),
-    slotId: String(item?.slot_id ?? ''),
+    name: String(item?.name ?? item?.label ?? ''),
+    slotId: String(item?.slot_id ?? item?.id ?? ''),
 });
 
 export class GetAvailableVisitSlotsRequest extends ProcessApiRequest {
