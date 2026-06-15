@@ -1,6 +1,8 @@
 import {
     ExecuteCallbackRequest,
     GetActualVisitRequest,
+    GetAvailableVisitDatesRequest,
+    GetAvailableVisitTimeWindowsRequest,
     GetPhoneByMaxUserIdRequest,
     GetVisitActionButtonsRequest,
     GetVisitFieldsRequest,
@@ -11,6 +13,25 @@ import {
 
 export function getActualVisit(phone, maxUserId, options = {}) {
     return new GetActualVisitRequest({ phone, maxUserId }, options).execute();
+}
+
+export function getAvailableVisitDates(tvsId, phone, options = {}) {
+    return new GetAvailableVisitDatesRequest(
+        { tvsId, phone },
+        options
+    ).execute();
+}
+
+export function getAvailableVisitTimeWindows(
+    tvsId,
+    date,
+    phone,
+    options = {}
+) {
+    return new GetAvailableVisitTimeWindowsRequest(
+        { date, phone, tvsId },
+        options
+    ).execute();
 }
 
 export function getVisitActionButtons(tvsId, options = {}) {

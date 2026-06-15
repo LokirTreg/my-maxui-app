@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { getVisitHistory } from '../api/processApi';
+import { getRequestOptions } from '../api/requestOptions';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Layout } from '../components/Layout';
@@ -16,9 +17,7 @@ const createInitialState = () => ({
     visits: [],
 });
 
-const requestOptions = {
-    mode: 'http',
-};
+const requestOptions = getRequestOptions();
 
 export function HistoryPage() {
     const navigate = useNavigate();
