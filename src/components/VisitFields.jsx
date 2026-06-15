@@ -4,7 +4,7 @@ export function VisitFields({ fields }) {
     if (!fields.length) {
         return <EmptyState text="Данные визита не найдены" />;
     }
-
+    console.log(fields)
     return (
         <div className="visit-fields">
             {fields.map((field, index) => (
