@@ -7,7 +7,7 @@ import {
     getAvailableVisitDates,
     getAvailableVisitSlots,
 } from '../api/processApi';
-import { getRequestOptions } from '../api/requestOptions';
+import { getRequestOptions, isMockApiMode } from '../api/requestOptions';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { EmptyState } from '../components/EmptyState';
 import { Layout } from '../components/Layout';
@@ -32,8 +32,20 @@ const createSlotsState = () => ({
 const createSubmitState = () => ({
     error: '',
     loading: false,
-    message: '',
 });
+
+const buildVisitPageUrl = (tvsId) => {
+    const params = new URLSearchParams();
+
+    if (isMockApiMode()) {
+        params.set('mock', '1');
+    }
+
+    const query = params.toString();
+    const path = `/visit/${encodeURIComponent(tvsId)}`;
+
+    return query ? `${path}?${query}` : path;
+};
 
 export function ChangeTimePage() {
     const navigate = useNavigate();
@@ -255,7 +267,6 @@ export function ChangeTimePage() {
         setSubmitState({
             error: '',
             loading: true,
-            message: '',
         });
         addLog(
             'action',
@@ -269,15 +280,15 @@ export function ChangeTimePage() {
                 requestOptions
             );
 
-            setSubmitState({
-                error: '',
-                loading: false,
-                message: result.message,
-            });
+            if (!result.ok) {
+                throw new Error(result.message || 'Не удалось изменить слот');
+            }
+
             addLog(
                 'info',
                 `Слот визита изменён: ${result.slotId}, ${result.message}`
             );
+            navigate(buildVisitPageUrl(tvsId));
         } catch (error) {
             const message =
                 error instanceof Error
@@ -287,7 +298,6 @@ export function ChangeTimePage() {
             setSubmitState({
                 error: message,
                 loading: false,
-                message: '',
             });
             addLog('error', `Ошибка подтверждения слота: ${message}`);
         }
@@ -442,12 +452,6 @@ export function ChangeTimePage() {
                                         message="Не удалось подтвердить выбор. Подробности в логах."
                                         onRetry={handleConfirmSlot}
                                     />
-                                )}
-
-                                {submitState.message && (
-                                    <p className="status-message">
-                                        {submitState.message}
-                                    </p>
                                 )}
                             </div>
                         )}
