@@ -245,6 +245,20 @@ a {
     color: #1741a6;
 }
 
+.confirm-slot {
+    display: grid;
+    gap: 10px;
+}
+
+.confirm-button {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 8px;
+    background: #16825d;
+    color: #ffffff;
+    font-weight: 800;
+}
+
 .warehouse-contacts {
     display: grid;
     gap: 8px;

@@ -1,8 +1,9 @@
 export { ProcessApiRequest } from './requests/ProcessApiRequest';
+export { ChangeVisitSlotRequest } from './requests/ChangeVisitSlotRequest';
 export { ExecuteCallbackRequest } from './requests/ExecuteCallbackRequest';
 export { GetActualVisitRequest } from './requests/GetActualVisitRequest';
 export { GetAvailableVisitDatesRequest } from './requests/GetAvailableVisitDatesRequest';
-export { GetAvailableVisitTimeWindowsRequest } from './requests/GetAvailableVisitTimeWindowsRequest';
+export { GetAvailableVisitSlotsRequest } from './requests/GetAvailableVisitSlotsRequest';
 export { GetPhoneByMaxUserIdRequest } from './requests/GetPhoneByMaxUserIdRequest';
 export { GetVisitActionButtonsRequest } from './requests/GetVisitActionButtonsRequest';
 export { GetVisitFieldsRequest } from './requests/GetVisitFieldsRequest';

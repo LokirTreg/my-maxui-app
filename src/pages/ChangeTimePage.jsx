@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
+    changeVisitSlot,
     getAvailableVisitDates,
-    getAvailableVisitTimeWindows,
+    getAvailableVisitSlots,
 } from '../api/processApi';
 import { getRequestOptions } from '../api/requestOptions';
 import { ErrorMessage } from '../components/ErrorMessage';
@@ -22,10 +23,16 @@ const createDatesState = () => ({
     loading: false,
 });
 
-const createWindowsState = () => ({
+const createSlotsState = () => ({
     error: '',
     loading: false,
-    windows: [],
+    slots: [],
+});
+
+const createSubmitState = () => ({
+    error: '',
+    loading: false,
+    message: '',
 });
 
 export function ChangeTimePage() {
@@ -40,16 +47,17 @@ export function ChangeTimePage() {
     const [searchParams] = useSearchParams();
     const tvsId = searchParams.get('tvsid') || '';
     const [datesReloadKey, setDatesReloadKey] = useState(0);
-    const [windowsReloadKey, setWindowsReloadKey] = useState(0);
+    const [slotsReloadKey, setSlotsReloadKey] = useState(0);
     const [datesState, setDatesState] = useState(createDatesState);
-    const [windowsState, setWindowsState] = useState(createWindowsState);
+    const [submitState, setSubmitState] = useState(createSubmitState);
+    const [slotsState, setSlotsState] = useState(createSlotsState);
     const [selectedDate, setSelectedDate] = useState('');
-    const [selectedWindowId, setSelectedWindowId] = useState('');
+    const [selectedSlotId, setSelectedSlotId] = useState('');
     const selectedDateItem = datesState.dates.find(
         (dateItem) => dateItem.date === selectedDate
     );
-    const selectedWindow = windowsState.windows.find(
-        (windowItem) => windowItem.id === selectedWindowId
+    const selectedSlot = slotsState.slots.find(
+        (slot) => slot.slotId === selectedSlotId
     );
 
     useEffect(() => {
@@ -89,9 +97,10 @@ export function ChangeTimePage() {
                 error: '',
                 loading: true,
             });
-            setWindowsState(createWindowsState());
+            setSlotsState(createSlotsState());
+            setSubmitState(createSubmitState());
             setSelectedDate('');
-            setSelectedWindowId('');
+            setSelectedSlotId('');
             addLog('info', `Загрузка доступных дат для визита ${tvsId}`);
 
             try {
@@ -148,26 +157,27 @@ export function ChangeTimePage() {
 
         let isActive = true;
 
-        async function loadWindows() {
+        async function loadSlots() {
             await Promise.resolve();
 
             if (!isActive) {
                 return;
             }
 
-            setWindowsState({
+            setSlotsState({
                 error: '',
                 loading: true,
-                windows: [],
+                slots: [],
             });
-            setSelectedWindowId('');
+            setSelectedSlotId('');
+            setSubmitState(createSubmitState());
             addLog(
                 'info',
-                `Загрузка окон для визита ${tvsId} на дату ${selectedDate}`
+                `Загрузка слотов для визита ${tvsId} на дату ${selectedDate}`
             );
 
             try {
-                const result = await getAvailableVisitTimeWindows(
+                const result = await getAvailableVisitSlots(
                     tvsId,
                     selectedDate,
                     requestOptions
@@ -177,14 +187,14 @@ export function ChangeTimePage() {
                     return;
                 }
 
-                setWindowsState({
+                setSlotsState({
                     error: '',
                     loading: false,
-                    windows: result.windows || [],
+                    slots: result.slots || [],
                 });
                 addLog(
                     'info',
-                    `Окон на ${selectedDate}: ${result.windows?.length || 0}`
+                    `Слотов на ${selectedDate}: ${result.slots?.length || 0}`
                 );
             } catch (error) {
                 if (!isActive) {
@@ -194,18 +204,18 @@ export function ChangeTimePage() {
                 const message =
                     error instanceof Error
                         ? error.message
-                        : 'Не удалось загрузить временные окна';
+                        : 'Не удалось загрузить слоты';
 
-                setWindowsState({
+                setSlotsState({
                     error: message,
                     loading: false,
-                    windows: [],
+                    slots: [],
                 });
-                addLog('error', `Ошибка загрузки окон: ${message}`);
+                addLog('error', `Ошибка загрузки слотов: ${message}`);
             }
         }
 
-        loadWindows();
+        loadSlots();
 
         return () => {
             isActive = false;
@@ -217,22 +227,70 @@ export function ChangeTimePage() {
         phoneLoading,
         selectedDate,
         tvsId,
-        windowsReloadKey,
+        slotsReloadKey,
     ]);
 
     const handleDateSelect = (date) => {
         setSelectedDate(date);
-        setSelectedWindowId('');
-        setWindowsState(createWindowsState());
+        setSelectedSlotId('');
+        setSubmitState(createSubmitState());
+        setSlotsState(createSlotsState());
         addLog('action', `Выбрана дата переноса ${date}`);
     };
 
-    const handleWindowSelect = (windowItem) => {
-        setSelectedWindowId(windowItem.id);
+    const handleSlotSelect = (slot) => {
+        setSelectedSlotId(slot.slotId);
+        setSubmitState(createSubmitState());
         addLog(
             'action',
-            `Выбрано окно переноса ${selectedDate}: ${windowItem.value}`
+            `Выбран слот переноса ${selectedDate}: ${slot.slotId}`
         );
+    };
+
+    const handleConfirmSlot = async () => {
+        if (!selectedSlot) {
+            return;
+        }
+
+        setSubmitState({
+            error: '',
+            loading: true,
+            message: '',
+        });
+        addLog(
+            'action',
+            `Подтверждение переноса визита ${tvsId}, slot_id ${selectedSlot.slotId}`
+        );
+
+        try {
+            const result = await changeVisitSlot(
+                tvsId,
+                selectedSlot.slotId,
+                requestOptions
+            );
+
+            setSubmitState({
+                error: '',
+                loading: false,
+                message: result.message,
+            });
+            addLog(
+                'info',
+                `Слот визита изменён: ${result.slotId}, ${result.message}`
+            );
+        } catch (error) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'Не удалось подтвердить выбор';
+
+            setSubmitState({
+                error: message,
+                loading: false,
+                message: '',
+            });
+            addLog('error', `Ошибка подтверждения слота: ${message}`);
+        }
     };
 
     return (
@@ -308,25 +366,25 @@ export function ChangeTimePage() {
                         </div>
 
                         <div className="time-picker-block">
-                            <h2 className="section-title">Временные окна</h2>
+                            <h2 className="section-title">Слоты</h2>
 
                             {!selectedDate && (
                                 <p className="placeholder-text">
-                                    Выберите дату, чтобы увидеть доступное время.
+                                    Выберите дату, чтобы увидеть доступные слоты.
                                 </p>
                             )}
 
-                            {selectedDate && windowsState.loading && (
-                                <Loading text="Загружаем временные окна..." />
+                            {selectedDate && slotsState.loading && (
+                                <Loading text="Загружаем слоты..." />
                             )}
 
                             {selectedDate &&
-                                !windowsState.loading &&
-                                windowsState.error && (
+                                !slotsState.loading &&
+                                slotsState.error && (
                                     <ErrorMessage
-                                        message="Не удалось загрузить временные окна. Подробности в логах."
+                                        message="Не удалось загрузить слоты. Подробности в логах."
                                         onRetry={() =>
-                                            setWindowsReloadKey(
+                                            setSlotsReloadKey(
                                                 (key) => key + 1
                                             )
                                         }
@@ -334,34 +392,32 @@ export function ChangeTimePage() {
                                 )}
 
                             {selectedDate &&
-                                !windowsState.loading &&
-                                !windowsState.error &&
-                                !windowsState.windows.length && (
-                                    <EmptyState text="Нет доступных временных окон" />
+                                !slotsState.loading &&
+                                !slotsState.error &&
+                                !slotsState.slots.length && (
+                                    <EmptyState text="Нет доступных слотов" />
                                 )}
 
                             {selectedDate &&
-                                !windowsState.loading &&
-                                !windowsState.error &&
-                                windowsState.windows.length > 0 && (
+                                !slotsState.loading &&
+                                !slotsState.error &&
+                                slotsState.slots.length > 0 && (
                                     <div className="slot-list">
-                                        {windowsState.windows.map(
-                                            (windowItem) => (
+                                        {slotsState.slots.map(
+                                            (slot) => (
                                                 <Button
                                                     className={`slot-button ${
-                                                        selectedWindowId ===
-                                                        windowItem.id
+                                                        selectedSlotId ===
+                                                        slot.slotId
                                                             ? 'selected'
                                                             : ''
                                                     }`}
-                                                    key={windowItem.id}
+                                                    key={slot.slotId}
                                                     onClick={() =>
-                                                        handleWindowSelect(
-                                                            windowItem
-                                                        )
+                                                        handleSlotSelect(slot)
                                                     }
                                                 >
-                                                    {windowItem.label}
+                                                    {slot.name}
                                                 </Button>
                                             )
                                         )}
@@ -369,11 +425,31 @@ export function ChangeTimePage() {
                                 )}
                         </div>
 
-                        {selectedDateItem && selectedWindow && (
-                            <p className="status-message">
-                                Выбрано: {selectedDateItem.label},{' '}
-                                {selectedWindow.label}
-                            </p>
+                        {selectedDateItem && selectedSlot && (
+                            <div className="confirm-slot">
+                                <Button
+                                    className="confirm-button"
+                                    disabled={submitState.loading}
+                                    onClick={handleConfirmSlot}
+                                >
+                                    {submitState.loading
+                                        ? 'Отправляем...'
+                                        : 'Подтвердить выбор'}
+                                </Button>
+
+                                {submitState.error && (
+                                    <ErrorMessage
+                                        message="Не удалось подтвердить выбор. Подробности в логах."
+                                        onRetry={handleConfirmSlot}
+                                    />
+                                )}
+
+                                {submitState.message && (
+                                    <p className="status-message">
+                                        {submitState.message}
+                                    </p>
+                                )}
+                            </div>
                         )}
                     </div>
                 )}

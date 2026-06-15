@@ -1,8 +1,9 @@
 import {
+    ChangeVisitSlotRequest,
     ExecuteCallbackRequest,
     GetActualVisitRequest,
     GetAvailableVisitDatesRequest,
-    GetAvailableVisitTimeWindowsRequest,
+    GetAvailableVisitSlotsRequest,
     GetPhoneByMaxUserIdRequest,
     GetVisitActionButtonsRequest,
     GetVisitFieldsRequest,
@@ -10,6 +11,10 @@ import {
     GetWarehouseContactsRequest,
     SavePhoneByMaxUserIdRequest,
 } from './processRequests';
+
+export function changeVisitSlot(tvsId, slotId, options = {}) {
+    return new ChangeVisitSlotRequest({ slotId, tvsId }, options).execute();
+}
 
 export function getActualVisit(phone, maxUserId, options = {}) {
     return new GetActualVisitRequest({ phone, maxUserId }, options).execute();
@@ -22,13 +27,8 @@ export function getAvailableVisitDates(tvsId, options = {}) {
     ).execute();
 }
 
-export function getAvailableVisitTimeWindows(
-    tvsId,
-    date,
-    phone,
-    options = {}
-) {
-    return new GetAvailableVisitTimeWindowsRequest(
+export function getAvailableVisitSlots(tvsId, date, options = {}) {
+    return new GetAvailableVisitSlotsRequest(
         { date, tvsId },
         options
     ).execute();
