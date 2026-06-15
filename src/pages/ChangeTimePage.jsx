@@ -97,7 +97,6 @@ export function ChangeTimePage() {
             try {
                 const result = await getAvailableVisitDates(
                     tvsId,
-                    phone,
                     requestOptions
                 );
 
@@ -171,7 +170,6 @@ export function ChangeTimePage() {
                 const result = await getAvailableVisitTimeWindows(
                     tvsId,
                     selectedDate,
-                    phone,
                     requestOptions
                 );
 

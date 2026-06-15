@@ -29,7 +29,7 @@ export function getAvailableVisitTimeWindows(
     options = {}
 ) {
     return new GetAvailableVisitTimeWindowsRequest(
-        { date, phone, tvsId },
+        { date, tvsId },
         options
     ).execute();
 }

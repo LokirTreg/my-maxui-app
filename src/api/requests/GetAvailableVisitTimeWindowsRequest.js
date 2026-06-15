@@ -59,7 +59,6 @@ export class GetAvailableVisitTimeWindowsRequest extends ProcessApiRequest {
     buildProcessParams() {
         return {
             date: String(this.params.date || ''),
-            phone: String(this.params.phone || ''),
             tvsid: String(this.params.tvsId || ''),
         };
     }
