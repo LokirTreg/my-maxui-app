@@ -15,9 +15,9 @@ export function getActualVisit(phone, maxUserId, options = {}) {
     return new GetActualVisitRequest({ phone, maxUserId }, options).execute();
 }
 
-export function getAvailableVisitDates(tvsId, phone, options = {}) {
+export function getAvailableVisitDates(tvsId, options = {}) {
     return new GetAvailableVisitDatesRequest(
-        { tvsId, phone },
+        { tvsId },
         options
     ).execute();
 }

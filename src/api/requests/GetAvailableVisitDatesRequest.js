@@ -38,7 +38,6 @@ export class GetAvailableVisitDatesRequest extends ProcessApiRequest {
 
     buildProcessParams() {
         return {
-            phone: String(this.params.phone || ''),
             tvsid: String(this.params.tvsId || ''),
         };
     }
