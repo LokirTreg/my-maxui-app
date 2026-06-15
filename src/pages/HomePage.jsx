@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { getActualVisit } from '../api/processApi';
+import { getRequestOptions } from '../api/requestOptions';
 import { Layout } from '../components/Layout';
 import { VisitInfo } from '../components/VisitInfo';
 import { useDevLog } from '../logs/useDevLog';
@@ -11,9 +12,7 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { Loading } from '../components/Loading';
 import { useMaxUserPhone } from '../user/useMaxUserPhone';
 
-const requestOptions = {
-    mode: 'http',
-};
+const requestOptions = getRequestOptions();
 
 const createActualVisitState = () => ({
     error: '',

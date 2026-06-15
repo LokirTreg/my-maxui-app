@@ -8,6 +8,7 @@ import {
     getVisitFields,
     getWarehouseContacts,
 } from '../api/processApi';
+import { getRequestOptions } from '../api/requestOptions';
 import { ActionButtons } from './ActionButtons';
 import { ErrorMessage } from './ErrorMessage';
 import { Loading } from './Loading';
@@ -23,9 +24,7 @@ const createInitialState = () => ({
     loading: true,
 });
 
-const requestOptions = {
-    mode: 'http',
-};
+const requestOptions = getRequestOptions();
 
 const getLogErrorMessage = (error, fallback = 'unknown') =>
     error instanceof Error ? error.message : fallback;

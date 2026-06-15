@@ -1,6 +1,8 @@
 export { ProcessApiRequest } from './requests/ProcessApiRequest';
 export { ExecuteCallbackRequest } from './requests/ExecuteCallbackRequest';
 export { GetActualVisitRequest } from './requests/GetActualVisitRequest';
+export { GetAvailableVisitDatesRequest } from './requests/GetAvailableVisitDatesRequest';
+export { GetAvailableVisitTimeWindowsRequest } from './requests/GetAvailableVisitTimeWindowsRequest';
 export { GetPhoneByMaxUserIdRequest } from './requests/GetPhoneByMaxUserIdRequest';
 export { GetVisitActionButtonsRequest } from './requests/GetVisitActionButtonsRequest';
 export { GetVisitFieldsRequest } from './requests/GetVisitFieldsRequest';

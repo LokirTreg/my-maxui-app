@@ -4,6 +4,7 @@ import {
     getPhoneByMaxUserId,
     savePhoneByMaxUserId,
 } from '../api/processApi';
+import { getRequestOptions } from '../api/requestOptions';
 import { useDevLog } from '../logs/useDevLog';
 import { MaxUserPhoneContext } from './maxUserPhoneContext';
 
@@ -13,6 +14,7 @@ const DEV_MAX_USER = {
 };
 
 const DEV_PHONE = '79012345678';
+const requestOptions = getRequestOptions();
 
 const createInitialState = () => ({
     error: '',
@@ -89,7 +91,10 @@ export function MaxUserPhoneProvider({ children }) {
 
             try {
                 addLog('info', `Process: запрос телефона для maxUserId ${maxUserId}`);
-                const dbResult = await getPhoneByMaxUserId(maxUserId, { mode: 'http' });
+                const dbResult = await getPhoneByMaxUserId(
+                    maxUserId,
+                    requestOptions
+                );
                 const dbPhone = normalizePhone(dbResult.phone);
 
                 if (dbPhone) {
@@ -119,7 +124,12 @@ export function MaxUserPhoneProvider({ children }) {
                         throw new Error('MAX Bridge не вернул телефон');
                     }
 
-                    await savePhoneByMaxUserId(maxUserId, bridgePhone, chatId, { mode: 'http' });
+                    await savePhoneByMaxUserId(
+                        maxUserId,
+                        bridgePhone,
+                        chatId,
+                        requestOptions
+                    );
 
                     setState({
                         error: '',
