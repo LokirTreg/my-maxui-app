@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import {
     executeCallback,
+    getGeoPosition,
     getVisitActionButtons,
     getVisitFields,
     getWarehouseContacts,
@@ -11,19 +12,25 @@ import {
 import { getRequestOptions, isMockApiMode } from '../api/requestOptions';
 import { ActionButtons } from './ActionButtons';
 import { ErrorMessage } from './ErrorMessage';
+import { GeoPositionStatus } from './GeoPositionStatus';
 import { Loading } from './Loading';
 import { VisitFields } from './VisitFields';
 import { WarehouseContacts } from './WarehouseContacts';
 import { useDevLog } from '../logs/useDevLog';
+import { useMaxUserPhone } from '../user/useMaxUserPhone';
 
 const createInitialState = () => ({
     actions: [],
     contacts: [],
     error: '',
     fields: [],
+    geo: null,
+    geoError: '',
     loading: true,
 });
 
+const GEO_POSITION_ACTUALITY_MINUTES = 360;
+const GEO_SHARE_TEXT = `/get_geo_position`;
 const requestOptions = getRequestOptions();
 
 const getLogErrorMessage = (error, fallback = 'unknown') =>
@@ -49,11 +56,16 @@ const addMockParam = (path) => {
     return `${pathname}?${params.toString()}`;
 };
 
+const getWebApp = () =>
+    typeof window !== 'undefined' && window.WebApp ? window.WebApp : null;
+
 export function VisitInfo({ title, tvsId }) {
     const navigate = useNavigate();
     const { addLog } = useDevLog();
+    const { maxUserId, phone } = useMaxUserPhone();
     const [reloadKey, setReloadKey] = useState(0);
     const [state, setState] = useState(createInitialState);
+    const [geoSharePending, setGeoSharePending] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
     const [pendingAction, setPendingAction] = useState(null);
 
@@ -76,15 +88,51 @@ export function VisitInfo({ title, tvsId }) {
             }));
 
             try {
-                const [fieldsResult, actionsResult, contactsResult] =
+                const geoRequest = getGeoPosition(
+                    tvsId,
+                    phone,
+                    maxUserId,
+                    GEO_POSITION_ACTUALITY_MINUTES,
+                    requestOptions
+                )
+                    .then((result) => ({ result }))
+                    .catch((error) => ({ error }));
+                const [
+                    fieldsResult,
+                    actionsResult,
+                    contactsResult,
+                    geoResult,
+                ] =
                     await Promise.all([
                         getVisitFields(tvsId, requestOptions),
                         getVisitActionButtons(tvsId, requestOptions),
                         getWarehouseContacts(tvsId, requestOptions),
+                        geoRequest,
                     ]);
 
                 if (!isActive) {
                     return;
+                }
+
+                const geoError = geoResult.error
+                    ? 'Не удалось загрузить геопозицию'
+                    : '';
+                const geo = geoResult.result?.geo || null;
+
+                if (geoResult.error) {
+                    addLog(
+                        'error',
+                        `Ошибка геопозиции визита ${tvsId}: ${getLogErrorMessage(
+                            geoResult.error
+                        )}`
+                    );
+                } else {
+                    addLog(
+                        'info',
+                        geo
+                            ? `Геопозиция визита ${tvsId}: ${geo.latitude}, ${geo.longitude}`
+                            : `Геопозиция визита ${tvsId} не сохранена`
+                    );
                 }
 
                 setState({
@@ -92,6 +140,8 @@ export function VisitInfo({ title, tvsId }) {
                     contacts: contactsResult.fields || [],
                     error: '',
                     fields: fieldsResult.fields || [],
+                    geo,
+                    geoError,
                     loading: false,
                 });
 
@@ -116,6 +166,8 @@ export function VisitInfo({ title, tvsId }) {
                         'Не удалось загрузить данные визита'
                     ),
                     fields: [],
+                    geo: null,
+                    geoError: '',
                     loading: false,
                 });
 
@@ -133,7 +185,7 @@ export function VisitInfo({ title, tvsId }) {
         return () => {
             isActive = false;
         };
-    }, [addLog, reloadKey, tvsId]);
+    }, [addLog, maxUserId, phone, reloadKey, tvsId]);
 
     const handleCallback = async (callback, actionIndex) => {
         setPendingAction(actionIndex);
@@ -203,6 +255,52 @@ export function VisitInfo({ title, tvsId }) {
         setStatusMessage('Действие пока недоступно');
     };
 
+    const handleShareGeoRequest = async () => {
+        setGeoSharePending(true);
+        setStatusMessage('');
+        addLog('action', `MAX Bridge: shareMaxContent(${GEO_SHARE_TEXT})`);
+
+        try {
+            const webApp = getWebApp();
+
+            if (!webApp || typeof webApp.shareMaxContent !== 'function') {
+                throw new Error('MAX Bridge shareMaxContent недоступен');
+            }
+
+            const result = await webApp.shareMaxContent({
+                text: GEO_SHARE_TEXT,
+            });
+            const status = result?.status || 'unknown';
+
+            addLog('info', `Команда геопозиции: ${status}`);
+
+            if (status === 'shared') {
+                setStatusMessage(`Команда ${GEO_SHARE_TEXT} отправлена в чат`);
+                return;
+            }
+
+            if (status === 'cancelled') {
+                setStatusMessage('Отправка команды отменена');
+                return;
+            }
+
+            setStatusMessage(`Статус отправки команды: ${status}`);
+        } catch (error) {
+            const message = getUserErrorMessage(
+                error,
+                'Не удалось отправить команду геопозиции'
+            );
+
+            setStatusMessage(message);
+            addLog(
+                'error',
+                `Ошибка команды геопозиции: ${getLogErrorMessage(error)}`
+            );
+        } finally {
+            setGeoSharePending(false);
+        }
+    };
+
     if (state.loading) {
         return <Loading text="Загружаем данные визита..." />;
     }
@@ -241,6 +339,19 @@ export function VisitInfo({ title, tvsId }) {
                     <span className="visit-id">ID {tvsId}</span>
                 </div>
                 <VisitFields fields={state.fields} />
+            </Panel>
+
+            <Panel className="section">
+                <h2 className="section-title">
+                    Геопозиция
+                </h2>
+                <GeoPositionStatus
+                    error={state.geoError}
+                    geo={state.geo}
+                    actualityMinutes={GEO_POSITION_ACTUALITY_MINUTES}
+                    onShareRequest={handleShareGeoRequest}
+                    sharing={geoSharePending}
+                />
             </Panel>
 
             <Panel className="section">

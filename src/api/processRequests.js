@@ -4,6 +4,7 @@ export { ExecuteCallbackRequest } from './requests/ExecuteCallbackRequest';
 export { GetActualVisitRequest } from './requests/GetActualVisitRequest';
 export { GetAvailableVisitDatesRequest } from './requests/GetAvailableVisitDatesRequest';
 export { GetAvailableVisitSlotsRequest } from './requests/GetAvailableVisitSlotsRequest';
+export { GetGeoPositionRequest } from './requests/GetGeoPositionRequest';
 export { GetPhoneByMaxUserIdRequest } from './requests/GetPhoneByMaxUserIdRequest';
 export { GetVisitActionButtonsRequest } from './requests/GetVisitActionButtonsRequest';
 export { GetVisitFieldsRequest } from './requests/GetVisitFieldsRequest';

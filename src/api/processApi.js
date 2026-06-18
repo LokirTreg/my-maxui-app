@@ -4,6 +4,7 @@ import {
     GetActualVisitRequest,
     GetAvailableVisitDatesRequest,
     GetAvailableVisitSlotsRequest,
+    GetGeoPositionRequest,
     GetPhoneByMaxUserIdRequest,
     GetVisitActionButtonsRequest,
     GetVisitFieldsRequest,
@@ -30,6 +31,19 @@ export function getAvailableVisitDates(tvsId, options = {}) {
 export function getAvailableVisitSlots(tvsId, date, options = {}) {
     return new GetAvailableVisitSlotsRequest(
         { date, tvsId },
+        options
+    ).execute();
+}
+
+export function getGeoPosition(
+    tvsId,
+    phone,
+    maxUserId,
+    actualityMinutes,
+    options = {}
+) {
+    return new GetGeoPositionRequest(
+        { actualityMinutes, maxUserId, phone, tvsId },
         options
     ).execute();
 }
