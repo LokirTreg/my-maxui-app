@@ -274,35 +274,28 @@ a {
     font-weight: 800;
 }
 
-.geo-position-details {
-    display: grid;
-    gap: 8px;
+.geo-distance {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
     margin-top: 12px;
+    border: 1px solid #d7e0e6;
+    border-radius: 8px;
+    background: #f9fbfc;
+    padding: 12px;
 }
 
-.geo-position-row {
-    display: grid;
-    grid-template-columns: minmax(96px, 1fr) minmax(120px, 1.4fr);
-    gap: 10px;
-    align-items: center;
-    min-height: 38px;
-    border-bottom: 1px solid #edf1f4;
-    padding: 8px 0;
-}
-
-.geo-position-row:last-child {
-    border-bottom: 0;
-}
-
-.geo-position-label {
+.geo-distance-hint {
     color: #66717d;
     font-size: 14px;
     line-height: 1.35;
 }
 
-.geo-position-value {
+.geo-distance-value {
     color: #17202a;
-    font-size: 15px;
+    font-size: 18px;
+    font-weight: 800;
     line-height: 1.35;
     overflow-wrap: anywhere;
     text-align: right;
@@ -580,14 +573,18 @@ a {
     }
 
     .frm_val_norm,
-    .frm_val_border,
-    .geo-position-value {
+    .frm_val_border {
         justify-self: stretch;
         text-align: left;
     }
 
-    .geo-position-row {
-        grid-template-columns: 1fr;
+    .geo-distance {
+        align-items: flex-start;
+        flex-direction: column;
         gap: 6px;
+    }
+
+    .geo-distance-value {
+        text-align: left;
     }
 }

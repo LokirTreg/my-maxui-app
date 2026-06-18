@@ -1,6 +1,6 @@
 import { ProcessApiRequest } from './ProcessApiRequest';
 import { normalizeId } from './normalizeId';
-import { assertObject, assertString } from '../validation';
+import { assertObject, assertOptionalString, assertString } from '../validation';
 
 const getFirstValue = (source, keys) => {
     for (const key of keys) {
@@ -14,12 +14,30 @@ const getFirstValue = (source, keys) => {
     return '';
 };
 
+const isFalseValue = (value) =>
+    value === false ||
+    value === 0 ||
+    String(value).toLowerCase() === 'false' ||
+    String(value) === '0';
+
 const normalizeGeoItem = (item) => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) {
         return null;
     }
 
     if (item.Success === false || item.success === false || item.ok === false) {
+        return null;
+    }
+
+    const actualValue = getFirstValue(item, [
+        'is_actual',
+        'isActual',
+        'actual',
+        'IsActual',
+        'Actual',
+    ]);
+
+    if (actualValue !== '' && isFalseValue(actualValue)) {
         return null;
     }
 
@@ -114,7 +132,7 @@ export class GetGeoPositionRequest extends ProcessApiRequest {
         }
 
         assertObject(response.geo, 'getGeoPosition.response.geo');
-        assertString(
+        assertOptionalString(
             response.geo.savedAt,
             'getGeoPosition.response.geo.savedAt'
         );
