@@ -6,8 +6,8 @@ export function GeoPositionStatus({
     actualityMinutes,
     error,
     geo,
-    onShareRequest,
-    sharing,
+    onOpenRequest,
+    opening,
 }) {
     if (error) {
         return <EmptyState text="Геопозицию не удалось загрузить" />;
@@ -21,10 +21,10 @@ export function GeoPositionStatus({
                 />
                 <Button
                     className="geo-request-button"
-                    disabled={sharing}
-                    onClick={onShareRequest}
+                    disabled={opening}
+                    onClick={onOpenRequest}
                 >
-                    {sharing ? 'Открываем чат...' : 'Запросить геопозицию'}
+                    {opening ? 'Открываем чат...' : 'Запросить геопозицию'}
                 </Button>
             </div>
         );

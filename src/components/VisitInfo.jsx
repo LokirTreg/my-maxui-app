@@ -30,7 +30,8 @@ const createInitialState = () => ({
 });
 
 const GEO_POSITION_ACTUALITY_MINUTES = 360;
-const GEO_SHARE_TEXT = `/get_geo_position`;
+const GEO_POSITION_DEEP_LINK =
+    'https://max.ru/id7713689918_bot?start=getgeoposition';
 const requestOptions = getRequestOptions();
 
 const getLogErrorMessage = (error, fallback = 'unknown') =>
@@ -65,7 +66,7 @@ export function VisitInfo({ title, tvsId }) {
     const { maxUserId, phone } = useMaxUserPhone();
     const [reloadKey, setReloadKey] = useState(0);
     const [state, setState] = useState(createInitialState);
-    const [geoSharePending, setGeoSharePending] = useState(false);
+    const [geoLinkPending, setGeoLinkPending] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
     const [pendingAction, setPendingAction] = useState(null);
 
@@ -255,49 +256,38 @@ export function VisitInfo({ title, tvsId }) {
         setStatusMessage('Действие пока недоступно');
     };
 
-    const handleShareGeoRequest = async () => {
-        setGeoSharePending(true);
+    const handleOpenGeoRequest = async () => {
+        setGeoLinkPending(true);
         setStatusMessage('');
-        addLog('action', `MAX Bridge: shareMaxContent(${GEO_SHARE_TEXT})`);
+        addLog('action', `MAX Bridge: openMaxLink(${GEO_POSITION_DEEP_LINK})`);
 
         try {
             const webApp = getWebApp();
 
-            if (!webApp || typeof webApp.shareMaxContent !== 'function') {
-                throw new Error('MAX Bridge shareMaxContent недоступен');
-            }
-
-            const result = await webApp.shareMaxContent({
-                text: GEO_SHARE_TEXT,
-            });
-            const status = result?.status || 'unknown';
-
-            addLog('info', `Команда геопозиции: ${status}`);
-
-            if (status === 'shared') {
-                setStatusMessage(`Команда ${GEO_SHARE_TEXT} отправлена в чат`);
+            if (webApp && typeof webApp.openMaxLink === 'function') {
+                await Promise.resolve(webApp.openMaxLink(GEO_POSITION_DEEP_LINK));
+                setStatusMessage('Открываем чат для запроса геопозиции');
                 return;
             }
 
-            if (status === 'cancelled') {
-                setStatusMessage('Отправка команды отменена');
-                return;
-            }
-
-            setStatusMessage(`Статус отправки команды: ${status}`);
+            addLog(
+                'info',
+                'MAX Bridge openMaxLink недоступен, открываем deeplink через window.location.href'
+            );
+            window.location.href = GEO_POSITION_DEEP_LINK;
         } catch (error) {
             const message = getUserErrorMessage(
                 error,
-                'Не удалось отправить команду геопозиции'
+                'Не удалось открыть запрос геопозиции'
             );
 
             setStatusMessage(message);
             addLog(
                 'error',
-                `Ошибка команды геопозиции: ${getLogErrorMessage(error)}`
+                `Ошибка deeplink геопозиции: ${getLogErrorMessage(error)}`
             );
         } finally {
-            setGeoSharePending(false);
+            setGeoLinkPending(false);
         }
     };
 
@@ -349,8 +339,8 @@ export function VisitInfo({ title, tvsId }) {
                     error={state.geoError}
                     geo={state.geo}
                     actualityMinutes={GEO_POSITION_ACTUALITY_MINUTES}
-                    onShareRequest={handleShareGeoRequest}
-                    sharing={geoSharePending}
+                    onOpenRequest={handleOpenGeoRequest}
+                    opening={geoLinkPending}
                 />
             </Panel>
 
