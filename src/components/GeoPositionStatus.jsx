@@ -28,42 +28,79 @@ const getGeoNumber = (value) => {
     return Number.isFinite(numberValue) ? numberValue : null;
 };
 
-const getDistanceLabel = (geo) => {
+const getDistanceKm = (geo) => {
     const userLatitude = getGeoNumber(geo?.latitude);
     const userLongitude = getGeoNumber(geo?.longitude);
 
     if (userLatitude === null || userLongitude === null) {
-        return '';
+        return null;
     }
 
-    const distanceKm = getDistanceFromLatLonInKm(
+    return getDistanceFromLatLonInKm(
         WAREHOUSE_LATITUDE,
         WAREHOUSE_LONGITUDE,
         userLatitude,
         userLongitude
     );
+};
 
-    return Math.round(distanceKm).toLocaleString('ru-RU');
+const getDistanceLabel = (distanceKm) => {
+    if (distanceKm === null) {
+        return '';
+    }
+
+    const roundedDistance =
+        distanceKm < 10
+            ? Math.round(distanceKm * 10) / 10
+            : Math.round(distanceKm);
+
+    return roundedDistance.toLocaleString('ru-RU', {
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 0,
+    });
 };
 
 export function GeoPositionStatus({
     actualityMinutes,
+    arrivalPending,
     error,
     geo,
+    onMarkArrival,
     onOpenRequest,
     opening,
 }) {
-    const distanceLabel = getDistanceLabel(geo);
+    const distanceKm = getDistanceKm(geo);
+    const distanceLabel = getDistanceLabel(distanceKm);
+    const isNearWarehouse = distanceKm !== null && distanceKm < 1;
 
     if (distanceLabel) {
         return (
-            <div className="geo-distance">
-                <span className="geo-distance-hint">
-                    До склада примерно
-                </span>
-                <span className="geo-distance-value">
-                    {distanceLabel} км
-                </span>
+            <div className="geo-position">
+                <div className="geo-distance">
+                    <span className="geo-distance-hint">
+                        До склада примерно
+                    </span>
+                    <span className="geo-distance-value">
+                        {distanceLabel} км
+                    </span>
+                </div>
+                {isNearWarehouse ? (
+                    <Button
+                        className="geo-arrival-button"
+                        disabled={arrivalPending}
+                        onClick={onMarkArrival}
+                    >
+                        {arrivalPending ? 'Отмечаем...' : 'Отметил прибытие'}
+                    </Button>
+                ) : (
+                    <Button
+                        className="geo-request-button"
+                        disabled={opening}
+                        onClick={onOpenRequest}
+                    >
+                        {opening ? 'Открываем чат...' : 'Запросить геопозицию'}
+                    </Button>
+                )}
             </div>
         );
     }

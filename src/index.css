@@ -265,13 +265,21 @@ a {
     margin-top: 12px;
 }
 
-.geo-request-button {
+.geo-request-button,
+.geo-arrival-button {
     width: 100%;
     min-height: 44px;
     border-radius: 8px;
-    background: #2563eb;
     color: #ffffff;
     font-weight: 800;
+}
+
+.geo-request-button {
+    background: #2563eb;
+}
+
+.geo-arrival-button {
+    background: #16825d;
 }
 
 .geo-distance {

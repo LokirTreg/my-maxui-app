@@ -60,12 +60,22 @@ const addMockParam = (path) => {
 const getWebApp = () =>
     typeof window !== 'undefined' && window.WebApp ? window.WebApp : null;
 
+const buildArrivalCallback = (tvsId) => {
+    const params = new URLSearchParams({
+        method: 'mark_arrival',
+        tvsid: tvsId,
+    });
+
+    return params.toString();
+};
+
 export function VisitInfo({ title, tvsId }) {
     const navigate = useNavigate();
     const { addLog } = useDevLog();
     const { maxUserId, phone } = useMaxUserPhone();
     const [reloadKey, setReloadKey] = useState(0);
     const [state, setState] = useState(createInitialState);
+    const [arrivalPending, setArrivalPending] = useState(false);
     const [geoLinkPending, setGeoLinkPending] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
     const [pendingAction, setPendingAction] = useState(null);
@@ -291,6 +301,33 @@ export function VisitInfo({ title, tvsId }) {
         }
     };
 
+    const handleMarkArrival = async () => {
+        const callback = buildArrivalCallback(tvsId);
+        setArrivalPending(true);
+        setStatusMessage('');
+        addLog('action', `executeCallback: ${callback}`);
+
+        try {
+            const result = await executeCallback(callback, requestOptions);
+            setStatusMessage(result.message);
+            addLog('info', `Прибытие отмечено: ${result.message}`);
+            setReloadKey((key) => key + 1);
+        } catch (error) {
+            const message = getUserErrorMessage(
+                error,
+                'Не удалось отметить прибытие'
+            );
+
+            setStatusMessage(message);
+            addLog(
+                'error',
+                `Ошибка отметки прибытия: ${getLogErrorMessage(error)}`
+            );
+        } finally {
+            setArrivalPending(false);
+        }
+    };
+
     if (state.loading) {
         return <Loading text="Загружаем данные визита..." />;
     }
@@ -339,6 +376,8 @@ export function VisitInfo({ title, tvsId }) {
                     error={state.geoError}
                     geo={state.geo}
                     actualityMinutes={GEO_POSITION_ACTUALITY_MINUTES}
+                    arrivalPending={arrivalPending}
+                    onMarkArrival={handleMarkArrival}
                     onOpenRequest={handleOpenGeoRequest}
                     opening={geoLinkPending}
                 />

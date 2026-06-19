@@ -25,7 +25,9 @@ export class ExecuteCallbackRequest extends ProcessApiRequest {
             message:
                 method === 'cancel_visit'
                     ? 'Визит отменён'
-                    : 'Команда выполнена',
+                    : method === 'mark_arrival'
+                      ? 'Прибытие отмечено'
+                      : 'Команда выполнена',
         };
     }
 
