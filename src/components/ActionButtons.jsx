@@ -38,7 +38,7 @@ export function ActionButtons({
                         key={`${button.title}-${index}`}
                         onClick={() => {
                             if (actionKind === 'callback') {
-                                onCallback(button.callback || '', index);
+                                onCallback(button.callback || '', index, button);
                                 return;
                             }
 

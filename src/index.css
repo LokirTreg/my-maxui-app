@@ -180,13 +180,35 @@ a {
 }
 
 .btn_blue {
-    background: #2563eb;
-    color: #ffffff;
+    --action-button-bg: #2563eb;
+    --action-button-border: #2563eb;
+    --action-button-color: #ffffff;
+    background: var(--action-button-bg);
+    color: var(--action-button-color);
 }
 
 .btn_green {
-    background: #16825d;
-    color: #ffffff;
+    --action-button-bg: #16825d;
+    --action-button-border: #16825d;
+    --action-button-color: #ffffff;
+    background: var(--action-button-bg);
+    color: var(--action-button-color);
+}
+
+.btn_yellow {
+    --action-button-bg: #b99a0d;
+    --action-button-border: #b99a0d;
+    --action-button-color: #ffffff;
+    background: var(--action-button-bg);
+    color: var(--action-button-color);
+}
+
+.btn_red {
+    --action-button-bg: #b90d0d;
+    --action-button-border: #b90d0d;
+    --action-button-color: #ffffff;
+    background: var(--action-button-bg);
+    color: var(--action-button-color);
 }
 
 .action-button_callback {
@@ -194,9 +216,9 @@ a {
 }
 
 .action-button_route {
-    border: 1px solid #b8d7cd;
-    background: #effbf6;
-    color: #116146;
+    border: 1px solid var(--action-button-border, #b8d7cd);
+    background: var(--action-button-bg, #effbf6);
+    color: var(--action-button-color, #116146);
 }
 
 .secondary-button {
@@ -263,23 +285,6 @@ a {
     display: grid;
     gap: 10px;
     margin-top: 12px;
-}
-
-.geo-request-button,
-.geo-arrival-button {
-    width: 100%;
-    min-height: 44px;
-    border-radius: 8px;
-    color: #ffffff;
-    font-weight: 800;
-}
-
-.geo-request-button {
-    background: #2563eb;
-}
-
-.geo-arrival-button {
-    background: #16825d;
 }
 
 .geo-distance {

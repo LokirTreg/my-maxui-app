@@ -16,6 +16,7 @@ import { GeoPositionStatus } from './GeoPositionStatus';
 import { Loading } from './Loading';
 import { VisitFields } from './VisitFields';
 import { WarehouseContacts } from './WarehouseContacts';
+import { formatDistanceKm, getGeoDistanceKm } from '../geoDistance';
 import { useDevLog } from '../logs/useDevLog';
 import { useMaxUserPhone } from '../user/useMaxUserPhone';
 
@@ -30,6 +31,7 @@ const createInitialState = () => ({
 });
 
 const GEO_POSITION_ACTUALITY_MINUTES = 360;
+const ARRIVAL_DISTANCE_LIMIT_KM = 1;
 const GEO_POSITION_DEEP_LINK =
     'https://max.ru/id7713689918_bot?start=getgeoposition';
 const requestOptions = getRequestOptions();
@@ -60,6 +62,30 @@ const addMockParam = (path) => {
 const getWebApp = () =>
     typeof window !== 'undefined' && window.WebApp ? window.WebApp : null;
 
+const getCallbackMethod = (callback) => {
+    try {
+        return new URLSearchParams(callback || '').get('method') || '';
+    } catch {
+        return '';
+    }
+};
+
+const getLowerText = (value) => String(value || '').toLowerCase();
+
+const isArrivalButton = (button, callback) => {
+    const method = getCallbackMethod(callback);
+    const title = getLowerText(button?.title);
+    const code = getLowerText(button?.code || button?.name || button?.action);
+
+    return (
+        method === 'mark_arrival' ||
+        title.includes('прибыт') ||
+        title.includes('arrival') ||
+        code.includes('arrival') ||
+        code.includes('mark_arrival')
+    );
+};
+
 const buildArrivalCallback = (tvsId) => {
     const params = new URLSearchParams({
         method: 'mark_arrival',
@@ -75,8 +101,6 @@ export function VisitInfo({ title, tvsId }) {
     const { maxUserId, phone } = useMaxUserPhone();
     const [reloadKey, setReloadKey] = useState(0);
     const [state, setState] = useState(createInitialState);
-    const [arrivalPending, setArrivalPending] = useState(false);
-    const [geoLinkPending, setGeoLinkPending] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
     const [pendingAction, setPendingAction] = useState(null);
 
@@ -198,7 +222,99 @@ export function VisitInfo({ title, tvsId }) {
         };
     }, [addLog, maxUserId, phone, reloadKey, tvsId]);
 
-    const handleCallback = async (callback, actionIndex) => {
+    const openGeoRequestLink = async () => {
+        addLog('action', `MAX Bridge: openMaxLink(${GEO_POSITION_DEEP_LINK})`);
+
+        const webApp = getWebApp();
+
+        if (webApp && typeof webApp.openMaxLink === 'function') {
+            await Promise.resolve(webApp.openMaxLink(GEO_POSITION_DEEP_LINK));
+            return;
+        }
+
+        addLog(
+            'info',
+            'MAX Bridge openMaxLink недоступен, открываем deeplink через window.location.href'
+        );
+        window.location.href = GEO_POSITION_DEEP_LINK;
+    };
+
+    const handleArrivalCallback = async (callback, actionIndex) => {
+        const distanceKm = getGeoDistanceKm(state.geo);
+        const arrivalCallback = callback || buildArrivalCallback(tvsId);
+
+        setPendingAction(actionIndex);
+        setStatusMessage('');
+
+        if (distanceKm === null) {
+            try {
+                addLog(
+                    'info',
+                    'Для отметки прибытия нет актуальной геопозиции, открываем запрос геопозиции'
+                );
+                await openGeoRequestLink();
+                setStatusMessage('Открываем чат для запроса геопозиции');
+            } catch (error) {
+                const message = getUserErrorMessage(
+                    error,
+                    'Не удалось открыть запрос геопозиции'
+                );
+
+                setStatusMessage(message);
+                addLog(
+                    'error',
+                    `Ошибка deeplink геопозиции: ${getLogErrorMessage(error)}`
+                );
+            } finally {
+                setPendingAction(null);
+            }
+
+            return;
+        }
+
+        if (distanceKm >= ARRIVAL_DISTANCE_LIMIT_KM) {
+            const message = `До склада примерно ${formatDistanceKm(
+                distanceKm
+            )} км. Отметить прибытие можно ближе 1 км.`;
+
+            setStatusMessage(message);
+            addLog('warn', message);
+            setPendingAction(null);
+            return;
+        }
+
+        addLog('action', `executeCallback: ${arrivalCallback}`);
+
+        try {
+            const result = await executeCallback(
+                arrivalCallback,
+                requestOptions
+            );
+            setStatusMessage(result.message);
+            addLog('info', `Прибытие отмечено: ${result.message}`);
+            setReloadKey((key) => key + 1);
+        } catch (error) {
+            const message = getUserErrorMessage(
+                error,
+                'Не удалось отметить прибытие'
+            );
+
+            setStatusMessage(message);
+            addLog(
+                'error',
+                `Ошибка отметки прибытия: ${getLogErrorMessage(error)}`
+            );
+        } finally {
+            setPendingAction(null);
+        }
+    };
+
+    const handleCallback = async (callback, actionIndex, button = {}) => {
+        if (isArrivalButton(button, callback)) {
+            await handleArrivalCallback(callback, actionIndex);
+            return;
+        }
+
         setPendingAction(actionIndex);
         setStatusMessage('');
         addLog('action', `executeCallback: ${callback}`);
@@ -266,68 +382,6 @@ export function VisitInfo({ title, tvsId }) {
         setStatusMessage('Действие пока недоступно');
     };
 
-    const handleOpenGeoRequest = async () => {
-        setGeoLinkPending(true);
-        setStatusMessage('');
-        addLog('action', `MAX Bridge: openMaxLink(${GEO_POSITION_DEEP_LINK})`);
-
-        try {
-            const webApp = getWebApp();
-
-            if (webApp && typeof webApp.openMaxLink === 'function') {
-                await Promise.resolve(webApp.openMaxLink(GEO_POSITION_DEEP_LINK));
-                setStatusMessage('Открываем чат для запроса геопозиции');
-                return;
-            }
-
-            addLog(
-                'info',
-                'MAX Bridge openMaxLink недоступен, открываем deeplink через window.location.href'
-            );
-            window.location.href = GEO_POSITION_DEEP_LINK;
-        } catch (error) {
-            const message = getUserErrorMessage(
-                error,
-                'Не удалось открыть запрос геопозиции'
-            );
-
-            setStatusMessage(message);
-            addLog(
-                'error',
-                `Ошибка deeplink геопозиции: ${getLogErrorMessage(error)}`
-            );
-        } finally {
-            setGeoLinkPending(false);
-        }
-    };
-
-    const handleMarkArrival = async () => {
-        const callback = buildArrivalCallback(tvsId);
-        setArrivalPending(true);
-        setStatusMessage('');
-        addLog('action', `executeCallback: ${callback}`);
-
-        try {
-            const result = await executeCallback(callback, requestOptions);
-            setStatusMessage(result.message);
-            addLog('info', `Прибытие отмечено: ${result.message}`);
-            setReloadKey((key) => key + 1);
-        } catch (error) {
-            const message = getUserErrorMessage(
-                error,
-                'Не удалось отметить прибытие'
-            );
-
-            setStatusMessage(message);
-            addLog(
-                'error',
-                `Ошибка отметки прибытия: ${getLogErrorMessage(error)}`
-            );
-        } finally {
-            setArrivalPending(false);
-        }
-    };
-
     if (state.loading) {
         return <Loading text="Загружаем данные визита..." />;
     }
@@ -376,10 +430,6 @@ export function VisitInfo({ title, tvsId }) {
                     error={state.geoError}
                     geo={state.geo}
                     actualityMinutes={GEO_POSITION_ACTUALITY_MINUTES}
-                    arrivalPending={arrivalPending}
-                    onMarkArrival={handleMarkArrival}
-                    onOpenRequest={handleOpenGeoRequest}
-                    opening={geoLinkPending}
                 />
             </Panel>
 

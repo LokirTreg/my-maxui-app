@@ -50,6 +50,12 @@ export class GetVisitActionButtonsRequest extends ProcessApiRequest {
                     callback: `/change-time?tvsid=${id}`,
                     type: 'route',
                 },
+                {
+                    title: 'Отметить прибытие',
+                    cssclass: 'btn_green',
+                    callback: `method=mark_arrival&tvsid=${id}`,
+                    type: 'callback',
+                },
             ],
         };
     }

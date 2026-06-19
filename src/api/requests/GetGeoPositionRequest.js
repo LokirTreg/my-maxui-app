@@ -111,6 +111,16 @@ export class GetGeoPositionRequest extends ProcessApiRequest {
             };
         }
 
+        if (id === '125') {
+            return {
+                geo: {
+                    latitude: '54.954515',
+                    longitude: '35.882543',
+                    savedAt: '18.06.2026 10:26',
+                },
+            };
+        }
+
         return {
             geo: null,
         };
