@@ -30,7 +30,7 @@ const createInitialState = () => ({
     loading: true,
 });
 
-const GEO_POSITION_ACTUALITY_MINUTES = 360;
+const GEO_POSITION_ACTUALITY_MINUTES = 0; // 360
 const ARRIVAL_DISTANCE_LIMIT_KM = 1;
 const GEO_POSITION_DEEP_LINK =
     'https://max.ru/id7713689918_bot?start=getgeoposition';
