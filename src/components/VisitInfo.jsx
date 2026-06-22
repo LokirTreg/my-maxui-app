@@ -72,6 +72,14 @@ const getCallbackMethod = (callback) => {
 
 const getLowerText = (value) => String(value || '').toLowerCase();
 
+const getFirstText = (values, fallback) => {
+    const text = values.find(
+        (value) => typeof value === 'string' && value.trim()
+    );
+
+    return text || fallback;
+};
+
 const isArrivalButton = (button, callback) => {
     const method = getCallbackMethod(callback);
     const title = getLowerText(button?.title);
@@ -84,6 +92,39 @@ const isArrivalButton = (button, callback) => {
         code.includes('arrival') ||
         code.includes('mark_arrival')
     );
+};
+
+const isCancelButton = (button, callback) => {
+    const method = getCallbackMethod(callback);
+    const title = getLowerText(button?.title);
+    const code = getLowerText(button?.code || button?.name || button?.action);
+
+    return (
+        method === 'cancel_visit' ||
+        title.includes('отмен') ||
+        title.includes('cancel') ||
+        code.includes('cancel') ||
+        code.includes('cancel_visit')
+    );
+};
+
+const getCancelConfirmationMessage = (button) =>
+    getFirstText(
+        [
+            button?.confirmText,
+            button?.confirm_text,
+            button?.confirmation,
+            button?.confirm_message,
+        ],
+        'Отменить визит?'
+    );
+
+const confirmCancelAction = (button) => {
+    if (typeof window === 'undefined' || typeof window.confirm !== 'function') {
+        return true;
+    }
+
+    return window.confirm(getCancelConfirmationMessage(button));
 };
 
 const buildArrivalCallback = (tvsId) => {
@@ -310,6 +351,12 @@ export function VisitInfo({ title, tvsId }) {
     };
 
     const handleCallback = async (callback, actionIndex, button = {}) => {
+        if (isCancelButton(button, callback) && !confirmCancelAction(button)) {
+            setStatusMessage('Отмена визита не подтверждена');
+            addLog('info', `Callback отмены не подтверждён: ${callback}`);
+            return;
+        }
+
         if (isArrivalButton(button, callback)) {
             await handleArrivalCallback(callback, actionIndex);
             return;

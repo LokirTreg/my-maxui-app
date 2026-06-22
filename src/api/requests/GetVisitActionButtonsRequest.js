@@ -42,6 +42,7 @@ export class GetVisitActionButtonsRequest extends ProcessApiRequest {
                     title: 'Отменить визит',
                     cssclass: 'btn_blue',
                     callback: `method=cancel_visit&tvsid=${id}`,
+                    confirmText: 'Вы точно хотите отменить визит?',
                     type: 'callback',
                 },
                 {
