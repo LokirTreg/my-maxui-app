@@ -41,28 +41,21 @@ const normalizeGeoItem = (item) => {
         return null;
     }
 
-    const latitude = getFirstValue(item, [
-        'latitude',
-        'Latitude',
-        'lat',
-        'Lat',
-    ]);
-    const longitude = getFirstValue(item, [
-        'longitude',
-        'Longitude',
-        'lon',
-        'Lon',
-        'lng',
-        'Lng',
+    const distanceKm = getFirstValue(item, [
+        'distance_km',
+        'distanceKm',
+        'DistanceKm',
+        'distanceKM',
+        'distance',
+        'Distance',
     ]);
 
-    if (latitude === '' || longitude === '') {
+    if (distanceKm === '') {
         return null;
     }
 
     return {
-        latitude: String(latitude),
-        longitude: String(longitude),
+        distanceKm: String(distanceKm),
         savedAt: String(
             getFirstValue(item, [
                 'saved_at',
@@ -104,8 +97,7 @@ export class GetGeoPositionRequest extends ProcessApiRequest {
         if (id === '124') {
             return {
                 geo: {
-                    latitude: '55.755864',
-                    longitude: '37.617698',
+                    distanceKm: '182.4',
                     savedAt: '18.06.2026 10:24',
                 },
             };
@@ -114,8 +106,7 @@ export class GetGeoPositionRequest extends ProcessApiRequest {
         if (id === '125') {
             return {
                 geo: {
-                    latitude: '54.954515',
-                    longitude: '35.882543',
+                    distanceKm: '0.03',
                     savedAt: '18.06.2026 10:26',
                 },
             };
@@ -147,13 +138,8 @@ export class GetGeoPositionRequest extends ProcessApiRequest {
             'getGeoPosition.response.geo.savedAt'
         );
         assertString(
-            response.geo.latitude,
-            'getGeoPosition.response.geo.latitude',
-            { allowEmpty: false }
-        );
-        assertString(
-            response.geo.longitude,
-            'getGeoPosition.response.geo.longitude',
+            response.geo.distanceKm,
+            'getGeoPosition.response.geo.distanceKm',
             { allowEmpty: false }
         );
     }

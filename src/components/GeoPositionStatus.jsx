@@ -1,6 +1,18 @@
 import { EmptyState } from './EmptyState';
 import { formatDistanceKm, getGeoDistanceKm } from '../geoDistance';
 
+const getEmptyText = (error, actualityMinutes) => {
+    if (error) {
+        return error;
+    }
+
+    if (Number(actualityMinutes) > 0) {
+        return `Нет актуальной геопозиции за последние ${actualityMinutes} мин.`;
+    }
+
+    return 'Нет актуальной геопозиции';
+};
+
 export function GeoPositionStatus({
     actualityMinutes,
     error,
@@ -25,10 +37,7 @@ export function GeoPositionStatus({
     return (
         <div className="geo-position">
             <EmptyState
-                text={
-                    error ||
-                    `Нет данных для отображения. Возможные причины: отсутствие сигнала геопозиции, нахождение на складе или завершение визита`
-                }
+                text={getEmptyText(error, actualityMinutes)}
             />
         </div>
     );

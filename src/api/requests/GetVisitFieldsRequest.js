@@ -71,9 +71,9 @@ export class GetVisitFieldsRequest extends ProcessApiRequest {
 
     validateResponse(response) {
         assertObject(response, 'getVisitFields.response');
-        assertArray(response.data, 'getVisitFields.response.fields');
+        assertArray(response.fields, 'getVisitFields.response.fields');
 
-        response.data.forEach((field, index) => {
+        response.fields.forEach((field, index) => {
             const path = `getVisitFields.response.fields[${index}]`;
             assertObject(field, path);
             assertString(field.title, `${path}.title`);

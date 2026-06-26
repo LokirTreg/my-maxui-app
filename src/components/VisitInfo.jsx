@@ -32,8 +32,10 @@ const createInitialState = () => ({
 
 const GEO_POSITION_ACTUALITY_MINUTES = 0; // 360
 const ARRIVAL_DISTANCE_LIMIT_KM = 1;
-const GEO_POSITION_DEEP_LINK =
+const GEO_POSITION_REQUEST_DEEP_LINK =
     'https://max.ru/id7713689918_bot?start=getgeoposition';
+const GEO_POSITION_TOO_FAR_DEEP_LINK =
+    'https://max.ru/id7713689918_bot?start=updategeoposition';
 const requestOptions = getRequestOptions();
 
 const getLogErrorMessage = (error, fallback = 'unknown') =>
@@ -206,7 +208,7 @@ export function VisitInfo({ title, tvsId }) {
                     addLog(
                         'info',
                         geo
-                            ? `Геопозиция визита ${tvsId}: ${geo.latitude}, ${geo.longitude}`
+                            ? `Геопозиция визита ${tvsId}: расстояние ${geo.distanceKm} км`
                             : `Геопозиция визита ${tvsId} не сохранена`
                     );
                 }
@@ -263,13 +265,13 @@ export function VisitInfo({ title, tvsId }) {
         };
     }, [addLog, maxUserId, phone, reloadKey, tvsId]);
 
-    const openGeoRequestLink = async () => {
-        addLog('action', `MAX Bridge: openMaxLink(${GEO_POSITION_DEEP_LINK})`);
+    const openGeoRequestLink = async (deepLink) => {
+        addLog('action', `MAX Bridge: openMaxLink(${deepLink})`);
 
         const webApp = getWebApp();
 
         if (webApp && typeof webApp.openMaxLink === 'function') {
-            await Promise.resolve(webApp.openMaxLink(GEO_POSITION_DEEP_LINK));
+            await Promise.resolve(webApp.openMaxLink(deepLink));
             return;
         }
 
@@ -277,7 +279,7 @@ export function VisitInfo({ title, tvsId }) {
             'info',
             'MAX Bridge openMaxLink недоступен, открываем deeplink через window.location.href'
         );
-        window.location.href = GEO_POSITION_DEEP_LINK;
+        window.location.href = deepLink;
     };
 
     const handleArrivalCallback = async (callback, actionIndex) => {
@@ -293,7 +295,7 @@ export function VisitInfo({ title, tvsId }) {
                     'info',
                     'Для отметки прибытия нет актуальной геопозиции, открываем запрос геопозиции'
                 );
-                await openGeoRequestLink();
+                await openGeoRequestLink(GEO_POSITION_REQUEST_DEEP_LINK);
                 setStatusMessage('Открываем чат для запроса геопозиции');
             } catch (error) {
                 const message = getUserErrorMessage(
@@ -316,11 +318,29 @@ export function VisitInfo({ title, tvsId }) {
         if (distanceKm >= ARRIVAL_DISTANCE_LIMIT_KM) {
             const message = `До склада примерно ${formatDistanceKm(
                 distanceKm
-            )} км. Отметить прибытие можно ближе 1 км.`;
+            )} км. Открываем чат для уточнения геопозиции.`;
 
-            setStatusMessage(message);
-            addLog('warn', message);
-            setPendingAction(null);
+            try {
+                setStatusMessage(message);
+                addLog('warn', message);
+                await openGeoRequestLink(GEO_POSITION_TOO_FAR_DEEP_LINK);
+            } catch (error) {
+                const errorMessage = getUserErrorMessage(
+                    error,
+                    'Не удалось открыть уточнение геопозиции'
+                );
+
+                setStatusMessage(errorMessage);
+                addLog(
+                    'error',
+                    `Ошибка deeplink уточнения геопозиции: ${getLogErrorMessage(
+                        error
+                    )}`
+                );
+            } finally {
+                setPendingAction(null);
+            }
+
             return;
         }
 
