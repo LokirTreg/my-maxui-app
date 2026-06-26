@@ -465,7 +465,6 @@ export function VisitInfo({ title, tvsId }) {
     return (
         <div className="visit-info">
             <Panel className="section">
-                <h2 className="section-title">Кнопки визита</h2>
                 <ActionButtons
                     buttons={state.actions}
                     onCallback={handleCallback}
