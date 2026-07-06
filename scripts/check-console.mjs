@@ -37,6 +37,7 @@ const routes = [
     '/history',
     '/visit/132',
     '/change-time?tvsid=123',
+    '/unplanned-visit?mock=1',
 ];
 
 const browser = await chromium.launch({

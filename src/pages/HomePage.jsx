@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { getActualVisit } from '../api/processApi';
-import { getRequestOptions } from '../api/requestOptions';
+import { getRequestOptions, isMockApiMode } from '../api/requestOptions';
 import { Layout } from '../components/Layout';
 import { VisitInfo } from '../components/VisitInfo';
 import { useDevLog } from '../logs/useDevLog';
@@ -13,6 +13,9 @@ import { Loading } from '../components/Loading';
 import { useMaxUserPhone } from '../user/useMaxUserPhone';
 
 const requestOptions = getRequestOptions();
+
+const buildUnplannedVisitUrl = () =>
+    isMockApiMode() ? '/unplanned-visit?mock=1' : '/unplanned-visit';
 
 const createActualVisitState = () => ({
     error: '',
@@ -133,16 +136,31 @@ export function HomePage() {
                         {source && ` (${source})`}
                     </p>
                 </div>
-                <Button
-                    className="secondary-button"
-                    onClick={() => {
-                        addLog('action', `Открываем историю для ${phone}`);
-                        navigate('/history');
-                    }}
-                    disabled={phoneLoading || Boolean(phoneError)}
-                >
-                    История визитов
-                </Button>
+                <div className="header-actions">
+                    <Button
+                        className="secondary-button"
+                        onClick={() => {
+                            addLog('action', `Открываем историю для ${phone}`);
+                            navigate('/history');
+                        }}
+                        disabled={phoneLoading || Boolean(phoneError)}
+                    >
+                        История визитов
+                    </Button>
+                    <Button
+                        className="secondary-button"
+                        onClick={() => {
+                            addLog(
+                                'action',
+                                'Открываем регистрацию незапланированного визита'
+                            );
+                            navigate(buildUnplannedVisitUrl());
+                        }}
+                        disabled={phoneLoading || Boolean(phoneError)}
+                    >
+                        Зарегистрировать незапланированный визит
+                    </Button>
+                </div>
             </div>
 
             {phoneLoading && <Loading text="Получаем телефон пользователя..." />}

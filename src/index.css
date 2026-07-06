@@ -74,6 +74,12 @@ a {
     gap: 12px;
 }
 
+.header-actions {
+    display: grid;
+    flex: 0 0 min(210px, 46%);
+    gap: 8px;
+}
+
 .page-title {
     font-size: 20px;
     line-height: 1.25;
@@ -177,6 +183,8 @@ a {
     min-height: 44px;
     border-radius: 8px;
     font-weight: 700;
+    line-height: 1.25;
+    white-space: normal;
 }
 
 .btn_blue {
@@ -265,6 +273,38 @@ a {
     border-color: #2563eb;
     background: #e8f0ff;
     color: #1741a6;
+}
+
+.select-list {
+    display: grid;
+    gap: 10px;
+}
+
+.select-field {
+    display: grid;
+    gap: 6px;
+}
+
+.select-label {
+    color: #66717d;
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+.select-control {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid #cbd7df;
+    border-radius: 8px;
+    background: #f8fbfc;
+    color: #17202a;
+    padding: 8px 10px;
+    font: inherit;
+}
+
+.select-control:focus {
+    border-color: #2563eb;
+    outline: 2px solid #cfe0ff;
 }
 
 .confirm-slot {
@@ -578,6 +618,11 @@ a {
 
     .page-header {
         flex-direction: column;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-basis: auto;
     }
 
     .visit-field {

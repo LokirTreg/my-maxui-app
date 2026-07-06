@@ -1,11 +1,14 @@
 import {
     ChangeVisitSlotRequest,
+    CreateUnplannedVisitRequest,
     ExecuteCallbackRequest,
     GetActualVisitRequest,
     GetAvailableVisitDatesRequest,
     GetAvailableVisitSlotsRequest,
     GetGeoPositionRequest,
     GetPhoneByMaxUserIdRequest,
+    GetUnplannedVisitFormRequest,
+    GetUnplannedVisitSlotsRequest,
     GetVisitActionButtonsRequest,
     GetVisitFieldsRequest,
     GetVisitHistoryRequest,
@@ -15,6 +18,19 @@ import {
 
 export function changeVisitSlot(tvsId, slotId, options = {}) {
     return new ChangeVisitSlotRequest({ slotId, tvsId }, options).execute();
+}
+
+export function createUnplannedVisit(
+    phone,
+    maxUserId,
+    selections,
+    slotId,
+    options = {}
+) {
+    return new CreateUnplannedVisitRequest(
+        { maxUserId, phone, selections, slotId },
+        options
+    ).execute();
 }
 
 export function getActualVisit(phone, maxUserId, options = {}) {
@@ -44,6 +60,25 @@ export function getGeoPosition(
 ) {
     return new GetGeoPositionRequest(
         { actualityMinutes, maxUserId, phone, tvsId },
+        options
+    ).execute();
+}
+
+export function getUnplannedVisitForm(phone, maxUserId, options = {}) {
+    return new GetUnplannedVisitFormRequest(
+        { maxUserId, phone },
+        options
+    ).execute();
+}
+
+export function getUnplannedVisitSlots(
+    phone,
+    maxUserId,
+    selections,
+    options = {}
+) {
+    return new GetUnplannedVisitSlotsRequest(
+        { maxUserId, phone, selections },
         options
     ).execute();
 }

@@ -1,11 +1,14 @@
 export { ProcessApiRequest } from './requests/ProcessApiRequest';
 export { ChangeVisitSlotRequest } from './requests/ChangeVisitSlotRequest';
+export { CreateUnplannedVisitRequest } from './requests/CreateUnplannedVisitRequest';
 export { ExecuteCallbackRequest } from './requests/ExecuteCallbackRequest';
 export { GetActualVisitRequest } from './requests/GetActualVisitRequest';
 export { GetAvailableVisitDatesRequest } from './requests/GetAvailableVisitDatesRequest';
 export { GetAvailableVisitSlotsRequest } from './requests/GetAvailableVisitSlotsRequest';
 export { GetGeoPositionRequest } from './requests/GetGeoPositionRequest';
 export { GetPhoneByMaxUserIdRequest } from './requests/GetPhoneByMaxUserIdRequest';
+export { GetUnplannedVisitFormRequest } from './requests/GetUnplannedVisitFormRequest';
+export { GetUnplannedVisitSlotsRequest } from './requests/GetUnplannedVisitSlotsRequest';
 export { GetVisitActionButtonsRequest } from './requests/GetVisitActionButtonsRequest';
 export { GetVisitFieldsRequest } from './requests/GetVisitFieldsRequest';
 export { GetVisitHistoryRequest } from './requests/GetVisitHistoryRequest';
