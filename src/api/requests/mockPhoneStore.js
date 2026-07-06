@@ -1,4 +1,7 @@
-const userPhonesByMaxUserId = new Map([['100500', '79012345678']]);
+const userPhonesByMaxUserId = new Map([
+    ['100500', '79012345678'],
+    ['254022815', '79012345678'],
+]);
 
 export function getMockPhoneByMaxUserId(maxUserId) {
     return userPhonesByMaxUserId.get(String(maxUserId || '')) || '';

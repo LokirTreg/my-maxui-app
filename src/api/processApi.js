@@ -1,5 +1,6 @@
 import {
     ChangeVisitSlotRequest,
+    CheckSelfRegistrationRequest,
     CreateUnplannedVisitRequest,
     ExecuteCallbackRequest,
     GetActualVisitRequest,
@@ -18,6 +19,10 @@ import {
 
 export function changeVisitSlot(tvsId, slotId, options = {}) {
     return new ChangeVisitSlotRequest({ slotId, tvsId }, options).execute();
+}
+
+export function checkSelfRegistration(phone, options = {}) {
+    return new CheckSelfRegistrationRequest({ phone }, options).execute();
 }
 
 export function createUnplannedVisit(

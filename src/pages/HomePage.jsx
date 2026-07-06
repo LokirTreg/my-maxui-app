@@ -2,7 +2,7 @@ import { Button } from '@maxhub/max-ui';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { getActualVisit } from '../api/processApi';
+import { checkSelfRegistration, getActualVisit } from '../api/processApi';
 import { getRequestOptions, isMockApiMode } from '../api/requestOptions';
 import { Layout } from '../components/Layout';
 import { VisitInfo } from '../components/VisitInfo';
@@ -23,6 +23,13 @@ const createActualVisitState = () => ({
     tvsId: '',
 });
 
+const createSelfRegistrationState = () => ({
+    error: '',
+    loading: false,
+    phone: '',
+    registered: false,
+});
+
 export function HomePage() {
     const navigate = useNavigate();
     const { addLog } = useDevLog();
@@ -40,12 +47,20 @@ export function HomePage() {
     const [actualVisitState, setActualVisitState] = useState(
         createActualVisitState
     );
+    const [selfRegistrationState, setSelfRegistrationState] = useState(
+        createSelfRegistrationState
+    );
     const actualTvsId = tvsId || actualVisitState.tvsId;
     const shouldUseActualVisitRequest = !tvsId;
     const actualVisitLoading =
         shouldUseActualVisitRequest && actualVisitState.loading;
     const actualVisitError =
         shouldUseActualVisitRequest && actualVisitState.error;
+    const canShowSelfRegistration =
+        !phoneLoading &&
+        !phoneError &&
+        selfRegistrationState.phone === phone &&
+        selfRegistrationState.registered;
 
     useEffect(() => {
         if (phoneLoading || phoneError || tvsId) {
@@ -123,6 +138,78 @@ export function HomePage() {
         tvsId,
     ]);
 
+    useEffect(() => {
+        if (phoneLoading || phoneError || !phone) {
+            return;
+        }
+
+        let isActive = true;
+
+        async function loadSelfRegistrationStatus() {
+            await Promise.resolve();
+
+            if (!isActive) {
+                return;
+            }
+
+            setSelfRegistrationState({
+                error: '',
+                loading: true,
+                phone,
+                registered: false,
+            });
+
+            try {
+                addLog(
+                    'info',
+                    `Process: проверка саморегистрации для телефона ${phone}`
+                );
+
+                const result = await checkSelfRegistration(phone, requestOptions);
+
+                if (!isActive) {
+                    return;
+                }
+
+                setSelfRegistrationState({
+                    error: '',
+                    loading: false,
+                    phone,
+                    registered: result.registered,
+                });
+                addLog(
+                    'info',
+                    result.registered
+                        ? `Саморегистрация доступна для ${phone}`
+                        : `Саморегистрация недоступна для ${phone}`
+                );
+            } catch (error) {
+                if (!isActive) {
+                    return;
+                }
+
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Не удалось проверить саморегистрацию';
+
+                setSelfRegistrationState({
+                    error: message,
+                    loading: false,
+                    phone,
+                    registered: false,
+                });
+                addLog('error', `Ошибка проверки саморегистрации: ${message}`);
+            }
+        }
+
+        loadSelfRegistrationStatus();
+
+        return () => {
+            isActive = false;
+        };
+    }, [addLog, phone, phoneError, phoneLoading]);
+
     return (
         <Layout>
             <div className="page-header">
@@ -147,19 +234,25 @@ export function HomePage() {
                     >
                         История визитов
                     </Button>
-                    <Button
-                        className="secondary-button"
-                        onClick={() => {
-                            addLog(
-                                'action',
-                                'Открываем регистрацию незапланированного визита'
-                            );
-                            navigate(buildUnplannedVisitUrl());
-                        }}
-                        disabled={phoneLoading || Boolean(phoneError)}
-                    >
-                        Саморегистрация
-                    </Button>
+                    {canShowSelfRegistration && (
+                        <Button
+                            className="secondary-button"
+                            onClick={() => {
+                                addLog(
+                                    'action',
+                                    'Открываем регистрацию незапланированного визита'
+                                );
+                                navigate(buildUnplannedVisitUrl());
+                            }}
+                            disabled={
+                                phoneLoading ||
+                                Boolean(phoneError) ||
+                                selfRegistrationState.loading
+                            }
+                        >
+                            Саморегистрация
+                        </Button>
+                    )}
                 </div>
             </div>
 

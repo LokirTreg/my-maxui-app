@@ -1,5 +1,6 @@
 export { ProcessApiRequest } from './requests/ProcessApiRequest';
 export { ChangeVisitSlotRequest } from './requests/ChangeVisitSlotRequest';
+export { CheckSelfRegistrationRequest } from './requests/CheckSelfRegistrationRequest';
 export { CreateUnplannedVisitRequest } from './requests/CreateUnplannedVisitRequest';
 export { ExecuteCallbackRequest } from './requests/ExecuteCallbackRequest';
 export { GetActualVisitRequest } from './requests/GetActualVisitRequest';
