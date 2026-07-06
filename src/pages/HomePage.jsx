@@ -158,7 +158,7 @@ export function HomePage() {
                         }}
                         disabled={phoneLoading || Boolean(phoneError)}
                     >
-                        Зарегистрировать незапланированный визит
+                        Саморегистрация
                     </Button>
                 </div>
             </div>
