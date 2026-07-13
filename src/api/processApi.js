@@ -46,10 +46,11 @@ export function reserveUnplannedVisitSlot(
     maxUserId,
     selections,
     slotId,
+    userId,
     options = {}
 ) {
     return new ReserveUnplannedVisitSlotRequest(
-        { maxUserId, phone, selections, slotId },
+        { maxUserId, phone, selections, slotId, userId },
         options
     ).execute();
 }

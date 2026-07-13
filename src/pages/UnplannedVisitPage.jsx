@@ -55,6 +55,7 @@ export function UnplannedVisitPage() {
         maxUserId,
         phone,
         retry,
+        userId,
     } = useMaxUserPhone();
     const [fieldsReloadKey, setFieldsReloadKey] = useState(0);
     const [slotsReloadKey, setSlotsReloadKey] = useState(0);
@@ -295,6 +296,7 @@ export function UnplannedVisitPage() {
                 maxUserId,
                 selectedValues,
                 selectedSlot.slotId,
+                userId,
                 requestOptions
             );
 

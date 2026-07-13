@@ -33,8 +33,6 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
 
         return {
             ok: Boolean(
-                normalizedData?.ok ??
-                    normalizedData?.Success ??
                     normalizedData?.success ??
                     envelope.success
             ),
@@ -44,11 +42,6 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
             phone: String(normalizedData?.phone ?? this.params.phone ?? ''),
             userId: String(
                 normalizedData?.user_id ??
-                    normalizedData?.userId ??
-                    normalizedData?.UserId ??
-                    normalizedData?.userID ??
-                    normalizedData?.userid ??
-                    normalizedData?.UserID ??
                     this.params.userId ??
                     ''
             ),
