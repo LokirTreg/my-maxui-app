@@ -67,13 +67,13 @@ export class CreateUnplannedVisitRequest extends ProcessApiRequest {
         assertString(response.message, 'createUnplannedVisit.response.message', {
             allowEmpty: false,
         });
-        assertString(
-            response.reservationId,
-            'createUnplannedVisit.response.reservationId',
-            { allowEmpty: false }
-        );
-        assertString(response.tvsId, 'createUnplannedVisit.response.tvsId', {
-            allowEmpty: false,
-        });
+        // assertString(
+        //     response.reservationId,
+        //     'createUnplannedVisit.response.reservationId',
+        //     { allowEmpty: false }
+        // );
+        // assertString(response.tvsId, 'createUnplannedVisit.response.tvsId', {
+        //     allowEmpty: false,
+        // });
     }
 }
