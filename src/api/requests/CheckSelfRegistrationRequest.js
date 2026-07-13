@@ -37,13 +37,7 @@ export class CheckSelfRegistrationRequest extends ProcessApiRequest {
 
         return {
             registered: Boolean(
-                normalizedData?.registered ??
-                    normalizedData?.is_registered ??
-                    normalizedData?.isRegistered ??
-                    normalizedData?.exists ??
-                    normalizedData?.allowed ??
-                    normalizedData?.Success ??
-                    normalizedData?.success
+                    normalizedData?.is_registered
             ),
         };
     }
