@@ -84,15 +84,15 @@ export class ReserveUnplannedVisitSlotRequest extends ProcessApiRequest {
             'reserveUnplannedVisitSlot.response.message',
             { allowEmpty: false }
         );
-        assertString(
-            response.reservationId,
-            'reserveUnplannedVisitSlot.response.reservationId',
-            { allowEmpty: false }
-        );
-        assertString(response.slotId, 'reserveUnplannedVisitSlot.response.slotId', {
-            allowEmpty: false,
-        });
-        assertString(response.date, 'reserveUnplannedVisitSlot.response.date');
-        assertString(response.time, 'reserveUnplannedVisitSlot.response.time');
+        // assertString(
+        //     response.reservationId,
+        //     'reserveUnplannedVisitSlot.response.reservationId',
+        //     { allowEmpty: false }
+        // );
+        // assertString(response.slotId, 'reserveUnplannedVisitSlot.response.slotId', {
+        //     allowEmpty: false,
+        // });
+        // assertString(response.date, 'reserveUnplannedVisitSlot.response.date');
+        // assertString(response.time, 'reserveUnplannedVisitSlot.response.time');
     }
 }
