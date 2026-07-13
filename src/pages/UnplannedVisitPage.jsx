@@ -118,6 +118,7 @@ export function UnplannedVisitPage() {
                 const result = await getUnplannedVisitForm(
                     phone,
                     maxUserId,
+                    userId,
                     requestOptions
                 );
 
