@@ -7,15 +7,16 @@ export class CreateUnplannedVisitRequest extends ProcessApiRequest {
     }
 
     getMockFailureKey() {
-        return this.params.slotId;
+        return this.params.reservationId;
     }
 
     buildProcessParams() {
         return {
             max_user_id: String(this.params.maxUserId || ''),
             phone: String(this.params.phone || ''),
-            selections: this.params.selections || {},
-            slot_id: String(this.params.slotId || ''),
+            fields: this.params.fields || {},
+            reservation_id: String(this.params.reservationId || ''),
+            visit_purposes: this.params.purposes || [],
         };
     }
 
@@ -23,7 +24,7 @@ export class CreateUnplannedVisitRequest extends ProcessApiRequest {
         return {
             message: 'Незапланированный визит создан',
             ok: true,
-            slotId: String(this.params.slotId || ''),
+            reservationId: String(this.params.reservationId || ''),
             tvsId: '9001',
         };
     }
@@ -44,10 +45,10 @@ export class CreateUnplannedVisitRequest extends ProcessApiRequest {
                     normalizedData?.success ??
                     envelope.success
             ),
-            slotId: String(
-                normalizedData?.slot_id ??
-                    normalizedData?.slotId ??
-                    this.params.slotId ??
+            reservationId: String(
+                normalizedData?.reservation_id ??
+                    normalizedData?.reservationId ??
+                    this.params.reservationId ??
                     ''
             ),
             tvsId: String(
@@ -66,9 +67,11 @@ export class CreateUnplannedVisitRequest extends ProcessApiRequest {
         assertString(response.message, 'createUnplannedVisit.response.message', {
             allowEmpty: false,
         });
-        assertString(response.slotId, 'createUnplannedVisit.response.slotId', {
-            allowEmpty: false,
-        });
+        assertString(
+            response.reservationId,
+            'createUnplannedVisit.response.reservationId',
+            { allowEmpty: false }
+        );
         assertString(response.tvsId, 'createUnplannedVisit.response.tvsId', {
             allowEmpty: false,
         });

@@ -8,10 +8,12 @@ export { GetAvailableVisitDatesRequest } from './requests/GetAvailableVisitDates
 export { GetAvailableVisitSlotsRequest } from './requests/GetAvailableVisitSlotsRequest';
 export { GetGeoPositionRequest } from './requests/GetGeoPositionRequest';
 export { GetPhoneByMaxUserIdRequest } from './requests/GetPhoneByMaxUserIdRequest';
+export { GetUnplannedVisitCreationFormRequest } from './requests/GetUnplannedVisitCreationFormRequest';
 export { GetUnplannedVisitFormRequest } from './requests/GetUnplannedVisitFormRequest';
 export { GetUnplannedVisitSlotsRequest } from './requests/GetUnplannedVisitSlotsRequest';
 export { GetVisitActionButtonsRequest } from './requests/GetVisitActionButtonsRequest';
 export { GetVisitFieldsRequest } from './requests/GetVisitFieldsRequest';
 export { GetVisitHistoryRequest } from './requests/GetVisitHistoryRequest';
 export { GetWarehouseContactsRequest } from './requests/GetWarehouseContactsRequest';
+export { ReserveUnplannedVisitSlotRequest } from './requests/ReserveUnplannedVisitSlotRequest';
 export { SavePhoneByMaxUserIdRequest } from './requests/SavePhoneByMaxUserIdRequest';

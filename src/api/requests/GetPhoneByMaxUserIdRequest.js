@@ -1,5 +1,5 @@
 import { ProcessApiRequest } from './ProcessApiRequest';
-import { getMockPhoneByMaxUserId } from './mockPhoneStore';
+import { getMockUserByMaxUserId } from './mockPhoneStore';
 import { assertObject, assertString } from '../validation';
 
 export class GetPhoneByMaxUserIdRequest extends ProcessApiRequest {
@@ -22,9 +22,7 @@ export class GetPhoneByMaxUserIdRequest extends ProcessApiRequest {
     }
 
     buildMockResponse() {
-        return {
-            phone: getMockPhoneByMaxUserId(this.params.maxUserId),
-        };
+        return getMockUserByMaxUserId(this.params.maxUserId);
     }
 
     transformEnvelopeData(data) {
@@ -34,27 +32,52 @@ export class GetPhoneByMaxUserIdRequest extends ProcessApiRequest {
             if (typeof firstItem === 'string') {
                 return {
                     phone: firstItem,
+                    userId: '',
                 };
             }
 
             return {
                 phone: String(firstItem?.phone || ''),
+                userId: String(
+                    firstItem?.user_id ??
+                        firstItem?.userId ??
+                        firstItem?.UserId ??
+                        firstItem?.userID ??
+                        firstItem?.userid ??
+                        firstItem?.UserID ??
+                        firstItem?.id ??
+                        ''
+                ),
             };
         }
 
         if (typeof data === 'string') {
             return {
                 phone: data,
+                userId: '',
             };
         }
 
         return {
             phone: String(data?.phone || ''),
+            userId: String(
+                data?.user_id ??
+                    data?.userId ??
+                    data?.UserId ??
+                    data?.userID ??
+                    data?.userid ??
+                    data?.UserID ??
+                    data?.id ??
+                    ''
+            ),
         };
     }
 
     validateResponse(response) {
         assertObject(response, 'getPhoneByMaxUserId.response');
         assertString(response.phone, 'getPhoneByMaxUserId.response.phone');
+        assertString(response.userId, 'getPhoneByMaxUserId.response.userId', {
+            allowEmpty: false,
+        });
     }
 }

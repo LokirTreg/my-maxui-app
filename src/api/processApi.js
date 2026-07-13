@@ -8,12 +8,14 @@ import {
     GetAvailableVisitSlotsRequest,
     GetGeoPositionRequest,
     GetPhoneByMaxUserIdRequest,
+    GetUnplannedVisitCreationFormRequest,
     GetUnplannedVisitFormRequest,
     GetUnplannedVisitSlotsRequest,
     GetVisitActionButtonsRequest,
     GetVisitFieldsRequest,
     GetVisitHistoryRequest,
     GetWarehouseContactsRequest,
+    ReserveUnplannedVisitSlotRequest,
     SavePhoneByMaxUserIdRequest,
 } from './processRequests';
 
@@ -28,11 +30,25 @@ export function checkSelfRegistration(phone, options = {}) {
 export function createUnplannedVisit(
     phone,
     maxUserId,
+    reservationId,
+    fields,
+    purposes,
+    options = {}
+) {
+    return new CreateUnplannedVisitRequest(
+        { fields, maxUserId, phone, purposes, reservationId },
+        options
+    ).execute();
+}
+
+export function reserveUnplannedVisitSlot(
+    phone,
+    maxUserId,
     selections,
     slotId,
     options = {}
 ) {
-    return new CreateUnplannedVisitRequest(
+    return new ReserveUnplannedVisitSlotRequest(
         { maxUserId, phone, selections, slotId },
         options
     ).execute();
@@ -76,6 +92,18 @@ export function getUnplannedVisitForm(phone, maxUserId, options = {}) {
     ).execute();
 }
 
+export function getUnplannedVisitCreationForm(
+    phone,
+    maxUserId,
+    reservationId,
+    options = {}
+) {
+    return new GetUnplannedVisitCreationFormRequest(
+        { maxUserId, phone, reservationId },
+        options
+    ).execute();
+}
+
 export function getUnplannedVisitSlots(
     phone,
     maxUserId,
@@ -96,9 +124,15 @@ export function getPhoneByMaxUserId(maxUserId, options = {}) {
     return new GetPhoneByMaxUserIdRequest({ maxUserId }, options).execute();
 }
 
-export function savePhoneByMaxUserId(maxUserId, phone, chatid, options = {}) {
+export function savePhoneByMaxUserId(
+    maxUserId,
+    phone,
+    chatid,
+    userId,
+    options = {}
+) {
     return new SavePhoneByMaxUserIdRequest(
-        { maxUserId, phone, chatid },
+        { chatid, maxUserId, phone, userId },
         options
     ).execute();
 }

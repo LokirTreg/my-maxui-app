@@ -23,6 +23,7 @@ const createInitialState = () => ({
     maxUserId: '',
     phone: '',
     source: '',
+    userId: '',
 });
 
 const getWebApp = () =>
@@ -84,6 +85,7 @@ export function MaxUserPhoneProvider({ children }) {
                     maxUserId: '',
                     phone: '',
                     source: '',
+                    userId: '',
                 });
                 addLog('error', message);
                 return;
@@ -96,6 +98,8 @@ export function MaxUserPhoneProvider({ children }) {
                     requestOptions
                 );
                 const dbPhone = normalizePhone(dbResult.phone);
+                const userId = String(dbResult.userId || '');
+                addLog('info', `Process: получен userId ${userId}`);
 
                 if (dbPhone) {
                     setState({
@@ -105,6 +109,7 @@ export function MaxUserPhoneProvider({ children }) {
                         maxUserId,
                         phone: dbPhone,
                         source: 'process',
+                        userId,
                     });
                     addLog('info', `Телефон получен из Process: ${dbPhone}`);
                     return;
@@ -128,6 +133,7 @@ export function MaxUserPhoneProvider({ children }) {
                         maxUserId,
                         bridgePhone,
                         chatId,
+                        userId,
                         requestOptions
                     );
 
@@ -138,6 +144,7 @@ export function MaxUserPhoneProvider({ children }) {
                         maxUserId,
                         phone: bridgePhone,
                         source: 'bridge',
+                        userId,
                     });
                     addLog(
                         'info',
@@ -151,7 +158,13 @@ export function MaxUserPhoneProvider({ children }) {
                     `MAX Bridge requestContact недоступен, используем dev phone ${DEV_PHONE}`
                 );
 
-                await savePhoneByMaxUserId(maxUserId, DEV_PHONE);
+                await savePhoneByMaxUserId(
+                    maxUserId,
+                    DEV_PHONE,
+                    chatId,
+                    userId,
+                    requestOptions
+                );
 
                 setState({
                     error: '',
@@ -160,6 +173,7 @@ export function MaxUserPhoneProvider({ children }) {
                     maxUserId,
                     phone: DEV_PHONE,
                     source: 'dev',
+                    userId,
                 });
             } catch (error) {
                 const message =
@@ -174,6 +188,7 @@ export function MaxUserPhoneProvider({ children }) {
                     maxUserId,
                     phone: '',
                     source: '',
+                    userId: '',
                 });
                 addLog('error', `Ошибка получения телефона: ${message}`);
             }

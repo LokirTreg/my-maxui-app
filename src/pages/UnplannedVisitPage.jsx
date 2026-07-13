@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
-    createUnplannedVisit,
     getUnplannedVisitForm,
     getUnplannedVisitSlots,
+    reserveUnplannedVisitSlot,
 } from '../api/processApi';
 import { getRequestOptions, isMockApiMode } from '../api/requestOptions';
 import { EmptyState } from '../components/EmptyState';
@@ -34,17 +34,16 @@ const createSubmitState = () => ({
     loading: false,
 });
 
-const buildVisitPageUrl = (tvsId) => {
+const buildCreationPageUrl = (reservationId) => {
     const params = new URLSearchParams();
+
+    params.set('reservationid', reservationId);
 
     if (isMockApiMode()) {
         params.set('mock', '1');
     }
 
-    const query = params.toString();
-    const path = `/visit/${encodeURIComponent(tvsId)}`;
-
-    return query ? `${path}?${query}` : path;
+    return `/unplanned-visit/create?${params.toString()}`;
 };
 
 export function UnplannedVisitPage() {
@@ -276,7 +275,7 @@ export function UnplannedVisitPage() {
         addLog('action', `Выбран слот незапланированного визита: ${slot.slotId}`);
     };
 
-    const handleCreateVisit = async () => {
+    const handleReserveSlot = async () => {
         if (!selectedSlot) {
             return;
         }
@@ -287,11 +286,11 @@ export function UnplannedVisitPage() {
         });
         addLog(
             'action',
-            `Создание незапланированного визита, slot_id ${selectedSlot.slotId}`
+            `Резервирование времени незапланированного визита, slot_id ${selectedSlot.slotId}`
         );
 
         try {
-            const result = await createUnplannedVisit(
+            const result = await reserveUnplannedVisitSlot(
                 phone,
                 maxUserId,
                 selectedValues,
@@ -300,25 +299,25 @@ export function UnplannedVisitPage() {
             );
 
             if (!result.ok) {
-                throw new Error(result.message || 'Не удалось создать визит');
+                throw new Error(result.message || 'Не удалось зарезервировать время');
             }
 
             addLog(
                 'info',
-                `Незапланированный визит создан: ${result.tvsId}, ${result.message}`
+                `Время визита зарезервировано: ${result.reservationId}, ${result.message}`
             );
-            navigate(buildVisitPageUrl(result.tvsId));
+            navigate(buildCreationPageUrl(result.reservationId));
         } catch (error) {
             const message =
                 error instanceof Error
                     ? error.message
-                    : 'Не удалось создать визит';
+                    : 'Не удалось зарезервировать время';
 
             setSubmitState({
                 error: message,
                 loading: false,
             });
-            addLog('error', `Ошибка создания незапланированного визита: ${message}`);
+            addLog('error', `Ошибка резервирования времени: ${message}`);
         }
     };
 
@@ -479,17 +478,17 @@ export function UnplannedVisitPage() {
                                     <Button
                                         className="confirm-button"
                                         disabled={submitState.loading}
-                                        onClick={handleCreateVisit}
+                                        onClick={handleReserveSlot}
                                     >
                                         {submitState.loading
-                                            ? 'Создаём...'
+                                            ? 'Резервируем...'
                                             : 'Подтвердить время'}
                                     </Button>
 
                                     {submitState.error && (
                                         <ErrorMessage
-                                            message="Не удалось создать визит. Подробности в логах."
-                                            onRetry={handleCreateVisit}
+                                            message="Не удалось зарезервировать время. Подробности в логах."
+                                            onRetry={handleReserveSlot}
                                         />
                                     )}
                                 </div>
