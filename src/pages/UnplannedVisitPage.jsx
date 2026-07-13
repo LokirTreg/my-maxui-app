@@ -331,10 +331,6 @@ export function UnplannedVisitPage() {
                     <h1 className="page-title">
                         Незапланированный визит
                     </h1>
-                    <p className="page-description">
-                        MAX user: {maxUserId || '...'}
-                        {phone && `, телефон: ${phone}`}
-                    </p>
                 </div>
             </div>
 

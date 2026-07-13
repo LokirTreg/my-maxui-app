@@ -217,11 +217,6 @@ export function HomePage() {
                     <h1 className="page-title">
                         Информация об актуальном визите
                     </h1>
-                    <p className="page-description">
-                        MAX user: {maxUserId || '...'}
-                        {phone && `, телефон: ${phone}`}
-                        {source && ` (${source})`}
-                    </p>
                 </div>
                 <div className="header-actions">
                     <Button

@@ -103,10 +103,6 @@ export function HistoryPage() {
                     <h1 className="page-title">
                         История визитов
                     </h1>
-                    <p className="page-description">
-                        MAX user: {maxUserId || '...'}
-                        {phone && `, телефон: ${phone}`}
-                    </p>
                 </div>
                 <Button
                     className="secondary-button"
