@@ -28,6 +28,7 @@ export class ReserveUnplannedVisitSlotRequest extends ProcessApiRequest {
             reservationId: 'reservation-9001',
             slotId: String(this.params.slotId || ''),
             time: '14:00 - 16:00',
+            tvsId: '9001',
         };
     }
 
@@ -73,6 +74,14 @@ export class ReserveUnplannedVisitSlotRequest extends ProcessApiRequest {
                     normalizedData?.label ??
                     ''
             ),
+            tvsId: String(
+                normalizedData?.tvsid ??
+                    normalizedData?.tvsId ??
+                    normalizedData?.TVSID ??
+                    normalizedData?.visit_id ??
+                    normalizedData?.visitId ??
+                    ''
+            ),
         };
     }
 
@@ -84,15 +93,17 @@ export class ReserveUnplannedVisitSlotRequest extends ProcessApiRequest {
             'reserveUnplannedVisitSlot.response.message',
             { allowEmpty: false }
         );
-        // assertString(
-        //     response.reservationId,
-        //     'reserveUnplannedVisitSlot.response.reservationId',
-        //     { allowEmpty: false }
-        // );
-        // assertString(response.slotId, 'reserveUnplannedVisitSlot.response.slotId', {
-        //     allowEmpty: false,
-        // });
-        // assertString(response.date, 'reserveUnplannedVisitSlot.response.date');
-        // assertString(response.time, 'reserveUnplannedVisitSlot.response.time');
+        assertString(
+            response.reservationId,
+            'reserveUnplannedVisitSlot.response.reservationId'
+        );
+        assertString(response.slotId, 'reserveUnplannedVisitSlot.response.slotId', {
+            allowEmpty: false,
+        });
+        assertString(response.date, 'reserveUnplannedVisitSlot.response.date');
+        assertString(response.time, 'reserveUnplannedVisitSlot.response.time');
+        assertString(response.tvsId, 'reserveUnplannedVisitSlot.response.tvsId', {
+            allowEmpty: false,
+        });
     }
 }

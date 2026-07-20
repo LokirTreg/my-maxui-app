@@ -34,16 +34,17 @@ const createSubmitState = () => ({
     loading: false,
 });
 
-const buildCreationPageUrl = (reservationId) => {
+const buildVisitPageUrl = (tvsId) => {
     const params = new URLSearchParams();
-
-    params.set('reservationid', reservationId);
 
     if (isMockApiMode()) {
         params.set('mock', '1');
     }
 
-    return `/unplanned-visit/create?${params.toString()}`;
+    const query = params.toString();
+    const path = `/visit/${encodeURIComponent(tvsId)}`;
+
+    return query ? `${path}?${query}` : path;
 };
 
 export function UnplannedVisitPage() {
@@ -307,9 +308,9 @@ export function UnplannedVisitPage() {
 
             addLog(
                 'info',
-                `Время визита зарезервировано: ${result.reservationId}, ${result.message}`
+                `Время визита зарезервировано, визит ${result.tvsId}: ${result.message}`
             );
-            navigate(buildCreationPageUrl(result.reservationId));
+            navigate(buildVisitPageUrl(result.tvsId));
         } catch (error) {
             const message =
                 error instanceof Error
