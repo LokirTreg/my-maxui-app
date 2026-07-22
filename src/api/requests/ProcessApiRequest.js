@@ -2,7 +2,7 @@ import { BaseApiRequest } from '../BaseApiRequest';
 
 export class ProcessApiRequest extends BaseApiRequest {
     get endpoint() {
-        return 'https://tsm.ant-tech.ru/Demo_108/MAX/MiniAppService.aspx';
+        return 'https://tsm.ant-tech.ru/vdnh/MAX/MiniAppService.aspx';
     }
 
     get method() {
