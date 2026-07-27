@@ -15,8 +15,52 @@ import { useDevLog } from '../logs/useDevLog';
 import { useMaxUserPhone } from '../user/useMaxUserPhone';
 
 const requestOptions = getRequestOptions();
-const VEHICLE_NUMBER_PATTERN =
-    /^[АВЕКМНОРСТУХABEKMHOPCTYX]\d{3}[АВЕКМНОРСТУХABEKMHOPCTYX]{2}\d{2,3}$/i;
+const CREATION_FIELDS = [
+    {
+        canIgnoreMask: false,
+        hint: '',
+        id: 'driver_name',
+        name: 'ФИО водителя',
+        options: [],
+        placeholder: 'Введите ФИО водителя',
+        required: true,
+        type: 'text',
+    },
+    {
+        canIgnoreMask: false,
+        hint: '',
+        id: 'vehicle_number',
+        name: 'Гос. номер ТС',
+        options: [],
+        placeholder: 'Введите гос. номер ТС',
+        required: true,
+        type: 'text',
+    },
+];
+
+const VISIT_PURPOSES = [
+    { id: 'unloading', name: 'Выгрузка' },
+    { id: 'loading', name: 'Загрузка' },
+];
+
+const selectCreationFields = (fields) =>
+    CREATION_FIELDS.map((defaultField) => ({
+        ...defaultField,
+        ...(fields || []).find((field) => field.id === defaultField.id),
+        name: defaultField.name,
+        options: [],
+        required: true,
+        type: 'text',
+    }));
+
+const selectVisitPurposes = (purposes) =>
+    VISIT_PURPOSES.map((defaultPurpose) => ({
+        ...defaultPurpose,
+        ...(purposes || []).find(
+            (purpose) => purpose.id === defaultPurpose.id
+        ),
+        name: defaultPurpose.name,
+    }));
 
 const createFormState = () => ({
     date: '',
@@ -61,7 +105,6 @@ export function UnplannedVisitCreationPage() {
     const [formState, setFormState] = useState(createFormState);
     const [submitState, setSubmitState] = useState(createSubmitState);
     const [values, setValues] = useState({});
-    const [ignoredMasks, setIgnoredMasks] = useState({});
     const [selectedPurposes, setSelectedPurposes] = useState([]);
 
     const missingRequiredFields = useMemo(
@@ -107,22 +150,20 @@ export function UnplannedVisitCreationPage() {
                     return;
                 }
 
+                const fields = selectCreationFields(result.fields);
+                const purposes = selectVisitPurposes(result.purposes);
                 const initialValues = Object.fromEntries(
-                    (result.fields || []).map((field) => [
-                        field.id,
-                        field.id === 'driver_phone' ? phone : '',
-                    ])
+                    fields.map((field) => [field.id, ''])
                 );
 
                 setValues(initialValues);
-                setIgnoredMasks({});
                 setSelectedPurposes([]);
                 setFormState({
                     date: result.date || '',
                     error: '',
-                    fields: result.fields || [],
+                    fields,
                     loading: false,
-                    purposes: result.purposes || [],
+                    purposes,
                     time: result.time || '',
                 });
                 addLog(
@@ -189,26 +230,6 @@ export function UnplannedVisitCreationPage() {
             return;
         }
 
-        const vehicleNumberField = formState.fields.find(
-            (field) => field.id === 'vehicle_number'
-        );
-        const vehicleNumber = String(values.vehicle_number || '')
-            .replace(/\s/g, '')
-            .toUpperCase();
-
-        if (
-            vehicleNumberField &&
-            vehicleNumber &&
-            !ignoredMasks.vehicle_number &&
-            !VEHICLE_NUMBER_PATTERN.test(vehicleNumber)
-        ) {
-            setSubmitState({
-                error: 'Проверьте формат гос. номера или отметьте иностранный номер',
-                loading: false,
-            });
-            return;
-        }
-
         if (formState.purposes.length > 0 && selectedPurposes.length === 0) {
             setSubmitState({
                 error: 'Выберите цель визита',
@@ -216,12 +237,6 @@ export function UnplannedVisitCreationPage() {
             });
             return;
         }
-
-        const fields = { ...values };
-
-        Object.entries(ignoredMasks).forEach(([fieldId, ignored]) => {
-            fields[`${fieldId}_ignore_mask`] = ignored;
-        });
 
         setSubmitState({ error: '', loading: true });
         addLog('action', `Создание визита по резерву ${reservationId}`);
@@ -231,7 +246,7 @@ export function UnplannedVisitCreationPage() {
                 phone,
                 maxUserId,
                 reservationId,
-                fields,
+                values,
                 selectedPurposes,
                 requestOptions
             );
@@ -296,9 +311,9 @@ export function UnplannedVisitCreationPage() {
         <Layout>
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">Создание визита</h1>
+                    <h1 className="page-title">Данные визита</h1>
                     <p className="page-description">
-                        Заполните данные водителя и транспорта
+                        Заполните данные водителя, транспорта и цель визита
                     </p>
                 </div>
             </div>
@@ -372,24 +387,6 @@ export function UnplannedVisitCreationPage() {
                                     {field.hint && (
                                         <span className="form-hint">{field.hint}</span>
                                     )}
-                                    {field.canIgnoreMask && (
-                                        <label className="checkbox-field">
-                                            <input
-                                                checked={Boolean(
-                                                    ignoredMasks[field.id]
-                                                )}
-                                                type="checkbox"
-                                                onChange={(event) =>
-                                                    setIgnoredMasks((current) => ({
-                                                        ...current,
-                                                        [field.id]:
-                                                            event.target.checked,
-                                                    }))
-                                                }
-                                            />
-                                            <span>Номер иностранного государства</span>
-                                        </label>
-                                    )}
                                 </div>
                             ))}
 
@@ -431,7 +428,9 @@ export function UnplannedVisitCreationPage() {
                             disabled={submitState.loading}
                             type="submit"
                         >
-                            {submitState.loading ? 'Создаём визит...' : 'Завершить'}
+                            {submitState.loading
+                                ? 'Создаём визит...'
+                                : 'Создать визит'}
                         </Button>
                     </form>
                 )}

@@ -84,62 +84,16 @@ export class GetUnplannedVisitCreationFormRequest extends ProcessApiRequest {
     buildMockResponse() {
         const fields = [
             {
-                id: 'company_id',
-                name: 'Контрагент',
-                options: [
-                    { id: '1', name: '001 - ANT' },
-                    { id: '2', name: '002 - TEST1' },
-                    { id: '3', name: '003 - TEST2' },
-                ],
+                id: 'driver_name',
+                name: 'ФИО водителя',
                 required: true,
-                type: 'select',
+                type: 'text',
             },
             {
-                canIgnoreMask: true,
-                hint: 'Номер в формате А000АА00, А000АА000',
                 id: 'vehicle_number',
                 name: 'Гос. номер ТС',
                 required: true,
                 type: 'text',
-            },
-            {
-                id: 'driver_name',
-                name: 'ФИО водителя',
-                required: false,
-                type: 'text',
-            },
-            {
-                id: 'vehicle_type',
-                name: 'Тип ТС',
-                options: [
-                    { id: '1', name: 'До 10т' },
-                    { id: '2', name: 'Свыше 10т' },
-                ],
-                required: true,
-                type: 'select',
-            },
-            {
-                id: 'product_type',
-                name: 'Тип продукции',
-                options: [
-                    { id: '4', name: 'Сырье' },
-                    { id: '5', name: 'Упаковка' },
-                    { id: '6', name: 'Готовая продукция' },
-                ],
-                required: false,
-                type: 'select',
-            },
-            {
-                id: 'driver_phone',
-                name: 'Телефон водителя',
-                required: false,
-                type: 'tel',
-            },
-            {
-                id: 'pallet_count',
-                name: 'Количество паллет',
-                required: false,
-                type: 'number',
             },
         ].map((field) => ({
             canIgnoreMask: false,
@@ -153,8 +107,8 @@ export class GetUnplannedVisitCreationFormRequest extends ProcessApiRequest {
             date: '13.07.2026',
             fields,
             purposes: [
-                { id: 'unloading', name: 'Разгрузка' },
-                { id: 'loading', name: 'Погрузка' },
+                { id: 'unloading', name: 'Выгрузка' },
+                { id: 'loading', name: 'Загрузка' },
             ],
             time: '14:00 - 16:00',
         };
