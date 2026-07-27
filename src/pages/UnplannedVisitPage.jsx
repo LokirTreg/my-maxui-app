@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
+    getUnplannedVisitDates,
     getUnplannedVisitForm,
     getUnplannedVisitSlots,
     reserveUnplannedVisitSlot,
@@ -27,6 +28,12 @@ const createSlotsState = () => ({
     error: '',
     loading: false,
     slots: [],
+});
+
+const createDatesState = () => ({
+    dates: [],
+    error: '',
+    loading: false,
 });
 
 const createSubmitState = () => ({
@@ -59,11 +66,14 @@ export function UnplannedVisitPage() {
         userId,
     } = useMaxUserPhone();
     const [fieldsReloadKey, setFieldsReloadKey] = useState(0);
+    const [datesReloadKey, setDatesReloadKey] = useState(0);
     const [slotsReloadKey, setSlotsReloadKey] = useState(0);
     const [fieldsState, setFieldsState] = useState(createFieldsState);
+    const [datesState, setDatesState] = useState(createDatesState);
     const [slotsState, setSlotsState] = useState(createSlotsState);
     const [submitState, setSubmitState] = useState(createSubmitState);
     const [selectedValues, setSelectedValues] = useState({});
+    const [selectedDate, setSelectedDate] = useState('');
     const [selectedSlotId, setSelectedSlotId] = useState('');
     const allFieldsSelected =
         fieldsState.fields.length > 0 &&
@@ -109,9 +119,11 @@ export function UnplannedVisitPage() {
                 fields: [],
                 loading: true,
             });
+            setDatesState(createDatesState());
             setSlotsState(createSlotsState());
             setSubmitState(createSubmitState());
             setSelectedValues({});
+            setSelectedDate('');
             setSelectedSlotId('');
             addLog('info', `Загрузка формы незапланированного визита для ${phone}`);
 
@@ -169,10 +181,111 @@ export function UnplannedVisitPage() {
         phone,
         phoneError,
         phoneLoading,
+        userId,
     ]);
 
     useEffect(() => {
         if (phoneLoading || phoneError || !phone || !allFieldsSelected) {
+            return;
+        }
+
+        let isActive = true;
+        const selections = { ...selectedValues };
+
+        async function loadDates() {
+            await Promise.resolve();
+
+            if (!isActive) {
+                return;
+            }
+
+            setDatesState({
+                dates: [],
+                error: '',
+                loading: true,
+            });
+            setSlotsState(createSlotsState());
+            setSelectedDate('');
+            setSelectedSlotId('');
+            setSubmitState(createSubmitState());
+            addLog(
+                'info',
+                `Загрузка дат незапланированного визита: ${JSON.stringify(
+                    selections
+                )}`
+            );
+
+            try {
+                const result = await getUnplannedVisitDates(
+                    phone,
+                    maxUserId,
+                    selections,
+                    userId,
+                    requestOptions
+                );
+
+                if (!isActive) {
+                    return;
+                }
+
+                setDatesState({
+                    dates: result.dates || [],
+                    error: '',
+                    loading: false,
+                });
+                addLog(
+                    'info',
+                    `Доступных дат для незапланированного визита: ${
+                        result.dates?.length || 0
+                    }`
+                );
+            } catch (error) {
+                if (!isActive) {
+                    return;
+                }
+
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Не удалось загрузить даты';
+
+                setDatesState({
+                    dates: [],
+                    error: message,
+                    loading: false,
+                });
+                addLog(
+                    'error',
+                    `Ошибка дат незапланированного визита: ${message}`
+                );
+            }
+        }
+
+        loadDates();
+
+        return () => {
+            isActive = false;
+        };
+    }, [
+        addLog,
+        allFieldsSelected,
+        datesReloadKey,
+        maxUserId,
+        phone,
+        phoneError,
+        phoneLoading,
+        selectedValues,
+        userId,
+    ]);
+
+    useEffect(() => {
+        if (
+            phoneLoading ||
+            phoneError ||
+            !phone ||
+            !allFieldsSelected ||
+            !selectedDate
+        ) {
             return;
         }
 
@@ -205,6 +318,8 @@ export function UnplannedVisitPage() {
                     phone,
                     maxUserId,
                     selections,
+                    selectedDate,
+                    userId,
                     requestOptions
                 );
 
@@ -258,7 +373,9 @@ export function UnplannedVisitPage() {
         phoneError,
         phoneLoading,
         selectedValues,
+        selectedDate,
         slotsReloadKey,
+        userId,
     ]);
 
     const handleFieldChange = (fieldId, value) => {
@@ -266,10 +383,20 @@ export function UnplannedVisitPage() {
             ...current,
             [fieldId]: value,
         }));
+        setDatesState(createDatesState());
+        setSlotsState(createSlotsState());
+        setSubmitState(createSubmitState());
+        setSelectedDate('');
+        setSelectedSlotId('');
+        addLog('action', `Выбор поля ${fieldId}: ${value || '<empty>'}`);
+    };
+
+    const handleDateSelect = (date) => {
+        setSelectedDate(date);
         setSlotsState(createSlotsState());
         setSubmitState(createSubmitState());
         setSelectedSlotId('');
-        addLog('action', `Выбор поля ${fieldId}: ${value || '<empty>'}`);
+        addLog('action', `Выбрана дата незапланированного визита: ${date}`);
     };
 
     const handleSlotSelect = (slot) => {
@@ -298,6 +425,7 @@ export function UnplannedVisitPage() {
                 maxUserId,
                 selectedValues,
                 selectedSlot.slotId,
+                selectedDate,
                 userId,
                 requestOptions
             );
@@ -416,19 +544,79 @@ export function UnplannedVisitPage() {
                             </div>
 
                             <div className="time-picker-block">
-                                <h2 className="section-title">Доступное время</h2>
+                                <h2 className="section-title">Доступные даты</h2>
 
                                 {!allFieldsSelected && (
                                     <p className="placeholder-text">
-                                        Выберите все параметры, чтобы увидеть время.
+                                        Выберите все параметры, чтобы увидеть даты.
                                     </p>
                                 )}
 
-                                {allFieldsSelected && slotsState.loading && (
-                                    <Loading text="Загружаем время..." />
+                                {allFieldsSelected && datesState.loading && (
+                                    <Loading text="Загружаем даты..." />
                                 )}
 
                                 {allFieldsSelected &&
+                                    !datesState.loading &&
+                                    datesState.error && (
+                                        <ErrorMessage
+                                            message="Не удалось загрузить даты. Подробности в логах."
+                                            onRetry={() =>
+                                                setDatesReloadKey(
+                                                    (key) => key + 1
+                                                )
+                                            }
+                                        />
+                                    )}
+
+                                {allFieldsSelected &&
+                                    !datesState.loading &&
+                                    !datesState.error &&
+                                    !datesState.dates.length && (
+                                        <EmptyState text="Нет доступных дат" />
+                                    )}
+
+                                {allFieldsSelected &&
+                                    !datesState.loading &&
+                                    !datesState.error &&
+                                    datesState.dates.length > 0 && (
+                                        <div className="slot-list">
+                                            {datesState.dates.map((dateItem) => (
+                                                <Button
+                                                    className={`slot-button ${
+                                                        selectedDate ===
+                                                        dateItem.date
+                                                            ? 'selected'
+                                                            : ''
+                                                    }`}
+                                                    key={dateItem.date}
+                                                    onClick={() =>
+                                                        handleDateSelect(
+                                                            dateItem.date
+                                                        )
+                                                    }
+                                                >
+                                                    {dateItem.label}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    )}
+                            </div>
+
+                            <div className="time-picker-block">
+                                <h2 className="section-title">Доступное время</h2>
+
+                                {!selectedDate && (
+                                    <p className="placeholder-text">
+                                        Выберите дату, чтобы увидеть время.
+                                    </p>
+                                )}
+
+                                {selectedDate && slotsState.loading && (
+                                    <Loading text="Загружаем время..." />
+                                )}
+
+                                {selectedDate &&
                                     !slotsState.loading &&
                                     slotsState.error && (
                                         <ErrorMessage
@@ -441,14 +629,14 @@ export function UnplannedVisitPage() {
                                         />
                                     )}
 
-                                {allFieldsSelected &&
+                                {selectedDate &&
                                     !slotsState.loading &&
                                     !slotsState.error &&
                                     !slotsState.slots.length && (
                                         <EmptyState text="Нет доступного времени" />
                                     )}
 
-                                {allFieldsSelected &&
+                                {selectedDate &&
                                     !slotsState.loading &&
                                     !slotsState.error &&
                                     slotsState.slots.length > 0 && (
@@ -473,7 +661,7 @@ export function UnplannedVisitPage() {
                                     )}
                             </div>
 
-                            {selectedSlot && (
+                            {selectedDate && selectedSlot && (
                                 <div className="confirm-slot">
                                     <Button
                                         className="confirm-button"

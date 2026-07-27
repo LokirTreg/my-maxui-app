@@ -9,6 +9,7 @@ export { GetAvailableVisitSlotsRequest } from './requests/GetAvailableVisitSlots
 export { GetGeoPositionRequest } from './requests/GetGeoPositionRequest';
 export { GetPhoneByMaxUserIdRequest } from './requests/GetPhoneByMaxUserIdRequest';
 export { GetUnplannedVisitCreationFormRequest } from './requests/GetUnplannedVisitCreationFormRequest';
+export { GetUnplannedVisitDatesRequest } from './requests/GetUnplannedVisitDatesRequest';
 export { GetUnplannedVisitFormRequest } from './requests/GetUnplannedVisitFormRequest';
 export { GetUnplannedVisitSlotsRequest } from './requests/GetUnplannedVisitSlotsRequest';
 export { GetVisitActionButtonsRequest } from './requests/GetVisitActionButtonsRequest';

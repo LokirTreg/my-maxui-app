@@ -38,14 +38,16 @@ export class GetUnplannedVisitSlotsRequest extends ProcessApiRequest {
     }
 
     getMockFailureKey() {
-        return this.params.selections?.warehouse || '';
+        return this.params.date || this.params.selections?.warehouse || '';
     }
 
     buildProcessParams() {
         return {
+            date: String(this.params.date || ''),
             max_user_id: String(this.params.maxUserId || ''),
             phone: String(this.params.phone || ''),
             selections: JSON.stringify(this.params.selections || {}),
+            user_id: String(this.params.userId || ''),
         };
     }
 

@@ -12,6 +12,7 @@ export class ReserveUnplannedVisitSlotRequest extends ProcessApiRequest {
 
     buildProcessParams() {
         return {
+            date: String(this.params.date || ''),
             max_user_id: String(this.params.maxUserId || ''),
             phone: String(this.params.phone || ''),
             selections: this.params.selections || {},
