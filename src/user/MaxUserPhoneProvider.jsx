@@ -9,11 +9,6 @@ import { useDevLog } from '../logs/useDevLog';
 import { MaxUserPhoneContext } from './maxUserPhoneContext';
 import { PhoneRequestForm } from './PhoneRequestForm';
 
-const DEV_MAX_USER = {
-    first_name: 'Dev',
-    id: 254022815,
-};
-
 const requestOptions = getRequestOptions();
 
 const createInitialState = () => ({
@@ -65,14 +60,14 @@ export function MaxUserPhoneProvider({ children }) {
 
             const webApp = getWebApp();
             const initUser = getInitUser();
-            const maxUser = initUser || DEV_MAX_USER;
+            const maxUser = initUser;
             const maxUserId = String(maxUser?.id || '');
             const chatId = String(getChatId() || '');
                 
             if (!initUser) {
                 addLog(
-                    'info',
-                    `MAX Bridge initDataUnsafe.user недоступен, используем dev maxUserId ${maxUserId}`
+                    'error',
+                    'MAX Bridge initDataUnsafe.user недоступен'
                 );
             } else {
                 addLog('info', `MAX user id из initDataUnsafe: ${maxUserId}`);
