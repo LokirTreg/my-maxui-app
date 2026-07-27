@@ -7,18 +7,19 @@ import {
 import { getRequestOptions } from '../api/requestOptions';
 import { useDevLog } from '../logs/useDevLog';
 import { MaxUserPhoneContext } from './maxUserPhoneContext';
+import { PhoneRequestForm } from './PhoneRequestForm';
 
 const DEV_MAX_USER = {
     first_name: 'Dev',
     id: 254022815,
 };
 
-const DEV_PHONE = '79012345678';
 const requestOptions = getRequestOptions();
 
 const createInitialState = () => ({
     error: '',
     loading: true,
+    manualEntryRequired: false,
     maxUser: null,
     maxUserId: '',
     phone: '',
@@ -59,6 +60,7 @@ export function MaxUserPhoneProvider({ children }) {
                 ...current,
                 error: '',
                 loading: true,
+                manualEntryRequired: false,
             }));
 
             const webApp = getWebApp();
@@ -81,6 +83,7 @@ export function MaxUserPhoneProvider({ children }) {
                 setState({
                     error: message,
                     loading: false,
+                    manualEntryRequired: false,
                     maxUser,
                     maxUserId: '',
                     phone: '',
@@ -91,6 +94,8 @@ export function MaxUserPhoneProvider({ children }) {
                 return;
             }
 
+            let userId = '';
+
             try {
                 addLog('info', `Process: запрос телефона для maxUserId ${maxUserId}`);
                 const dbResult = await getPhoneByMaxUserId(
@@ -98,13 +103,14 @@ export function MaxUserPhoneProvider({ children }) {
                     requestOptions
                 );
                 const dbPhone = normalizePhone(dbResult.phone);
-                const userId = String(dbResult.userId || '');
+                userId = String(dbResult.userId || '');
                 addLog('info', `Process: получен userId ${userId}`);
 
                 if (dbPhone) {
                     setState({
                         error: '',
                         loading: false,
+                        manualEntryRequired: false,
                         maxUser,
                         maxUserId,
                         phone: dbPhone,
@@ -119,62 +125,83 @@ export function MaxUserPhoneProvider({ children }) {
                     'info',
                     `Process: телефон для maxUserId ${maxUserId} не найден`
                 );
+            } catch (error) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Не удалось проверить телефон в Process';
+                addLog(
+                    'warn',
+                    `Не удалось получить телефон из Process: ${message}`
+                );
+            }
 
-                if (webApp && typeof webApp.requestContact === 'function') {
-                    addLog('action', 'MAX Bridge: requestContact()');
-                    const contact = await webApp.requestContact();
-                    const bridgePhone = normalizePhone(contact?.phone);
+            try {
+                if (
+                    initUser &&
+                    webApp &&
+                    typeof webApp.requestContact === 'function'
+                ) {
+                    try {
+                        addLog('action', 'MAX Bridge: requestContact()');
+                        const contact = await webApp.requestContact();
+                        const bridgePhone = normalizePhone(contact?.phone);
 
-                    if (!bridgePhone) {
-                        throw new Error('MAX Bridge не вернул телефон');
+                        if (!bridgePhone) {
+                            throw new Error('MAX Bridge не вернул телефон');
+                        }
+
+                        await savePhoneByMaxUserId(
+                            maxUserId,
+                            bridgePhone,
+                            chatId,
+                            userId,
+                            requestOptions
+                        );
+
+                        setState({
+                            error: '',
+                            loading: false,
+                            manualEntryRequired: false,
+                            maxUser,
+                            maxUserId,
+                            phone: bridgePhone,
+                            source: 'bridge',
+                            userId,
+                        });
+                        addLog(
+                            'info',
+                            `Телефон получен из MAX Bridge и сохранён в Process: ${bridgePhone}`
+                        );
+                        return;
+                    } catch (error) {
+                        const message =
+                            error instanceof Error
+                                ? error.message
+                                : 'MAX Bridge не вернул телефон';
+                        addLog(
+                            'warn',
+                            `Не удалось получить телефон из MAX Bridge: ${message}`
+                        );
                     }
-
-                    await savePhoneByMaxUserId(
-                        maxUserId,
-                        bridgePhone,
-                        chatId,
-                        userId,
-                        requestOptions
-                    );
-
-                    setState({
-                        error: '',
-                        loading: false,
-                        maxUser,
-                        maxUserId,
-                        phone: bridgePhone,
-                        source: 'bridge',
-                        userId,
-                    });
+                } else {
                     addLog(
                         'info',
-                        `Телефон получен из MAX Bridge и сохранён в Process: ${bridgePhone}`
+                        'MAX Bridge requestContact недоступен без активного пользователя MAX'
                     );
-                    return;
                 }
-
-                addLog(
-                    'info',
-                    `MAX Bridge requestContact недоступен, используем dev phone ${DEV_PHONE}`
-                );
-
-                await savePhoneByMaxUserId(
-                    maxUserId,
-                    DEV_PHONE,
-                    chatId,
-                    userId,
-                    requestOptions
-                );
 
                 setState({
                     error: '',
                     loading: false,
+                    manualEntryRequired: true,
                     maxUser,
                     maxUserId,
-                    phone: DEV_PHONE,
-                    source: 'dev',
+                    phone: '',
+                    source: '',
                     userId,
                 });
+                addLog('info', 'Показываем форму ручного ввода телефона');
             } catch (error) {
                 const message =
                     error instanceof Error
@@ -184,6 +211,7 @@ export function MaxUserPhoneProvider({ children }) {
                 setState({
                     error: message,
                     loading: false,
+                    manualEntryRequired: false,
                     maxUser,
                     maxUserId,
                     phone: '',
@@ -205,17 +233,75 @@ export function MaxUserPhoneProvider({ children }) {
         setReloadKey((key) => key + 1);
     }, []);
 
+    const submitPhone = useCallback(
+        async (phone) => {
+            const normalizedPhone = normalizePhone(phone).replace(/\D/g, '');
+
+            setState((current) => ({
+                ...current,
+                error: '',
+                loading: true,
+            }));
+
+            try {
+                const result = await savePhoneByMaxUserId(
+                    state.maxUserId,
+                    normalizedPhone,
+                    String(getChatId() || ''),
+                    state.userId,
+                    requestOptions
+                );
+
+                setState((current) => ({
+                    ...current,
+                    error: '',
+                    loading: false,
+                    manualEntryRequired: false,
+                    phone: normalizedPhone,
+                    source: 'manual',
+                    userId: String(result.userId || current.userId),
+                }));
+                addLog(
+                    'info',
+                    `Телефон введён пользователем и сохранён в Process: ${normalizedPhone}`
+                );
+            } catch (error) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Не удалось сохранить номер телефона';
+
+                setState((current) => ({
+                    ...current,
+                    error: message,
+                    loading: false,
+                }));
+                addLog('error', `Ошибка сохранения телефона: ${message}`);
+            }
+        },
+        [addLog, state.maxUserId, state.userId]
+    );
+
     const value = useMemo(
         () => ({
             ...state,
             retry,
+            submitPhone,
         }),
-        [retry, state]
+        [retry, state, submitPhone]
     );
 
     return (
         <MaxUserPhoneContext.Provider value={value}>
-            {children}
+            {state.manualEntryRequired ? (
+                <PhoneRequestForm
+                    error={state.error}
+                    loading={state.loading}
+                    onSubmit={submitPhone}
+                />
+            ) : (
+                children
+            )}
         </MaxUserPhoneContext.Provider>
     );
 }

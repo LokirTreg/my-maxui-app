@@ -1,6 +1,6 @@
 const usersByMaxUserId = new Map([
-    ['100500', { phone: '79012345678', userId: '501' }],
-    ['254022815', { phone: '79012345678', userId: '502' }],
+    ['100500', { phone: '', userId: '501' }],
+    ['254022815', { phone: '', userId: '502' }],
 ]);
 
 export function getMockUserByMaxUserId(maxUserId) {
