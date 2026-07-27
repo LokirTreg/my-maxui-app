@@ -86,6 +86,7 @@ export class GetUnplannedVisitFormRequest extends ProcessApiRequest {
         return {
             max_user_id: String(this.params.maxUserId || ''),
             phone: String(this.params.phone || ''),
+            user_id: String(this.params.userId || ''),
         };
     }
 

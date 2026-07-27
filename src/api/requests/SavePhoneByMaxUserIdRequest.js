@@ -16,13 +16,15 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
             max_user_id: String(this.params.maxUserId || ''),
             phone: String(this.params.phone || ''),
             chatid: String(this.params.chatid || ''),
+            user_id: String(this.params.userId || ''),
         };
     }
 
     buildMockResponse() {
         return saveMockPhoneByMaxUserId(
             this.params.maxUserId,
-            this.params.phone
+            this.params.phone,
+            this.params.userId
         );
     }
 

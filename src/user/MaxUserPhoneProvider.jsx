@@ -155,15 +155,16 @@ export function MaxUserPhoneProvider({ children }) {
                             throw new Error('MAX Bridge не вернул телефон');
                         }
 
+                        const userId = await requestUserId(
+                            bridgePhone,
+                            addLog
+                        );
                         await savePhoneByMaxUserId(
                             maxUserId,
                             bridgePhone,
                             chatId,
+                            userId,
                             requestOptions
-                        );
-                        const userId = await requestUserId(
-                            bridgePhone,
-                            addLog
                         );
 
                         setState({
@@ -251,16 +252,17 @@ export function MaxUserPhoneProvider({ children }) {
             }));
 
             try {
+                const userId = await requestUserId(normalizedPhone, addLog);
+
                 if (state.maxUserId) {
                     await savePhoneByMaxUserId(
                         state.maxUserId,
                         normalizedPhone,
                         String(getChatId() || ''),
+                        userId,
                         requestOptions
                     );
                 }
-
-                const userId = await requestUserId(normalizedPhone, addLog);
 
                 setState((current) => ({
                     ...current,

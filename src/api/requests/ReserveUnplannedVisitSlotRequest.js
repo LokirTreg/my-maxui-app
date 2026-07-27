@@ -17,6 +17,7 @@ export class ReserveUnplannedVisitSlotRequest extends ProcessApiRequest {
             phone: String(this.params.phone || ''),
             selections: this.params.selections || {},
             slot_id: String(this.params.slotId || ''),
+            user_id: String(this.params.userId || ''),
         };
     }
 

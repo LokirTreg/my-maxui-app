@@ -49,10 +49,11 @@ export function reserveUnplannedVisitSlot(
     selections,
     slotId,
     date,
+    userId,
     options = {}
 ) {
     return new ReserveUnplannedVisitSlotRequest(
-        { date, maxUserId, phone, selections, slotId },
+        { date, maxUserId, phone, selections, slotId, userId },
         options
     ).execute();
 }
@@ -88,9 +89,9 @@ export function getGeoPosition(
     ).execute();
 }
 
-export function getUnplannedVisitForm(phone, maxUserId, options = {}) {
+export function getUnplannedVisitForm(phone, maxUserId, userId, options = {}) {
     return new GetUnplannedVisitFormRequest(
-        { maxUserId, phone },
+        { maxUserId, phone, userId },
         options
     ).execute();
 }
@@ -111,10 +112,11 @@ export function getUnplannedVisitDates(
     phone,
     maxUserId,
     selections,
+    userId,
     options = {}
 ) {
     return new GetUnplannedVisitDatesRequest(
-        { maxUserId, phone, selections },
+        { maxUserId, phone, selections, userId },
         options
     ).execute();
 }
@@ -124,10 +126,11 @@ export function getUnplannedVisitSlots(
     maxUserId,
     selections,
     date,
+    userId,
     options = {}
 ) {
     return new GetUnplannedVisitSlotsRequest(
-        { date, maxUserId, phone, selections },
+        { date, maxUserId, phone, selections, userId },
         options
     ).execute();
 }
@@ -148,10 +151,11 @@ export function savePhoneByMaxUserId(
     maxUserId,
     phone,
     chatid,
+    userId,
     options = {}
 ) {
     return new SavePhoneByMaxUserIdRequest(
-        { chatid, maxUserId, phone },
+        { chatid, maxUserId, phone, userId },
         options
     ).execute();
 }

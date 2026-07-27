@@ -11,18 +11,19 @@ export function getMockUserByMaxUserId(maxUserId) {
     };
 }
 
-export function saveMockPhoneByMaxUserId(maxUserId, phone) {
+export function saveMockPhoneByMaxUserId(maxUserId, phone, userId) {
     const maxId = String(maxUserId || '');
     const normalizedPhone = String(phone || '');
+    const normalizedUserId = String(userId || '');
 
-    if (maxId && normalizedPhone) {
+    if (maxId && normalizedPhone && normalizedUserId) {
         usersByMaxUserId.set(maxId, {
             phone: normalizedPhone,
         });
     }
 
     return {
-        ok: Boolean(maxId && normalizedPhone),
+        ok: Boolean(maxId && normalizedPhone && normalizedUserId),
         phone: normalizedPhone,
     };
 }
