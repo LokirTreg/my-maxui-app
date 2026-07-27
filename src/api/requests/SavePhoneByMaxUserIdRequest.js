@@ -16,15 +16,13 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
             max_user_id: String(this.params.maxUserId || ''),
             phone: String(this.params.phone || ''),
             chatid: String(this.params.chatid || ''),
-            user_id: String(this.params.userId || ''),
         };
     }
 
     buildMockResponse() {
         return saveMockPhoneByMaxUserId(
             this.params.maxUserId,
-            this.params.phone,
-            this.params.userId
+            this.params.phone
         );
     }
 
@@ -40,11 +38,6 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
                 normalizedData?.max_user_id ?? this.params.maxUserId ?? ''
             ),
             phone: String(normalizedData?.phone ?? this.params.phone ?? ''),
-            userId: String(
-                normalizedData?.user_id ??
-                    this.params.userId ??
-                    ''
-            ),
         };
     }
 
@@ -52,8 +45,5 @@ export class SavePhoneByMaxUserIdRequest extends ProcessApiRequest {
         assertObject(response, 'savePhoneByMaxUserId.response');
         assertBoolean(response.ok, 'savePhoneByMaxUserId.response.ok');
         assertString(response.phone, 'savePhoneByMaxUserId.response.phone');
-        assertString(response.userId, 'savePhoneByMaxUserId.response.userId', {
-            allowEmpty: false,
-        });
     }
 }

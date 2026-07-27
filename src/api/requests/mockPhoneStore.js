@@ -1,5 +1,5 @@
 const usersByMaxUserId = new Map([
-    ['100500', { phone: '', userId: '501' }],
+    ['100500', { phone: '' }],
 ]);
 
 export function getMockUserByMaxUserId(maxUserId) {
@@ -8,25 +8,21 @@ export function getMockUserByMaxUserId(maxUserId) {
 
     return {
         phone: storedUser?.phone || '',
-        userId: storedUser?.userId || (id ? `mock-user-${id}` : ''),
     };
 }
 
-export function saveMockPhoneByMaxUserId(maxUserId, phone, userId) {
+export function saveMockPhoneByMaxUserId(maxUserId, phone) {
     const maxId = String(maxUserId || '');
     const normalizedPhone = String(phone || '');
-    const normalizedUserId = String(userId || '');
 
-    if (maxId && normalizedPhone && normalizedUserId) {
+    if (maxId && normalizedPhone) {
         usersByMaxUserId.set(maxId, {
             phone: normalizedPhone,
-            userId: normalizedUserId,
         });
     }
 
     return {
-        ok: Boolean(maxId && normalizedPhone && normalizedUserId),
+        ok: Boolean(maxId && normalizedPhone),
         phone: normalizedPhone,
-        userId: normalizedUserId,
     };
 }

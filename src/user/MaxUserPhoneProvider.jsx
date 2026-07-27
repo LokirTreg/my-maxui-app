@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
     getPhoneByMaxUserId,
+    getUserIdByPhone,
     savePhoneByMaxUserId,
 } from '../api/processApi';
 import { getRequestOptions } from '../api/requestOptions';
@@ -35,6 +36,14 @@ const getChatId = () => {
 };
 
 const normalizePhone = (phone) => String(phone || '').replace(/[^\d+]/g, '');
+
+const requestUserId = async (phone, addLog) => {
+    addLog('info', `Process: запрос userId для телефона ${phone}`);
+    const result = await getUserIdByPhone(phone, requestOptions);
+    const userId = String(result.userId || '');
+    addLog('info', `Process: получен userId ${userId}`);
+    return userId;
+};
 
 export function MaxUserPhoneProvider({ children }) {
     const { addLog } = useDevLog();
@@ -91,8 +100,6 @@ export function MaxUserPhoneProvider({ children }) {
                 return;
             }
 
-            let userId = '';
-
             try {
                 addLog('info', `Process: запрос телефона для maxUserId ${maxUserId}`);
                 const dbResult = await getPhoneByMaxUserId(
@@ -100,10 +107,10 @@ export function MaxUserPhoneProvider({ children }) {
                     requestOptions
                 );
                 const dbPhone = normalizePhone(dbResult.phone);
-                userId = String(dbResult.userId || '');
-                addLog('info', `Process: получен userId ${userId}`);
 
                 if (dbPhone) {
+                    const userId = await requestUserId(dbPhone, addLog);
+
                     setState({
                         error: '',
                         loading: false,
@@ -152,8 +159,11 @@ export function MaxUserPhoneProvider({ children }) {
                             maxUserId,
                             bridgePhone,
                             chatId,
-                            userId,
                             requestOptions
+                        );
+                        const userId = await requestUserId(
+                            bridgePhone,
+                            addLog
                         );
 
                         setState({
@@ -196,7 +206,7 @@ export function MaxUserPhoneProvider({ children }) {
                     maxUserId,
                     phone: '',
                     source: '',
-                    userId,
+                    userId: '',
                 });
                 addLog('info', 'Показываем форму ручного ввода телефона');
             } catch (error) {
@@ -241,18 +251,16 @@ export function MaxUserPhoneProvider({ children }) {
             }));
 
             try {
-                let userId = state.userId;
-
                 if (state.maxUserId) {
-                    const result = await savePhoneByMaxUserId(
+                    await savePhoneByMaxUserId(
                         state.maxUserId,
                         normalizedPhone,
                         String(getChatId() || ''),
-                        state.userId,
                         requestOptions
                     );
-                    userId = String(result.userId || userId);
                 }
+
+                const userId = await requestUserId(normalizedPhone, addLog);
 
                 setState((current) => ({
                     ...current,
@@ -283,7 +291,7 @@ export function MaxUserPhoneProvider({ children }) {
                 addLog('error', `Ошибка сохранения телефона: ${message}`);
             }
         },
-        [addLog, state.maxUserId, state.userId]
+        [addLog, state.maxUserId]
     );
 
     const value = useMemo(

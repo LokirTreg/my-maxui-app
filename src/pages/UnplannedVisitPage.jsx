@@ -63,7 +63,6 @@ export function UnplannedVisitPage() {
         maxUserId,
         phone,
         retry,
-        userId,
     } = useMaxUserPhone();
     const [fieldsReloadKey, setFieldsReloadKey] = useState(0);
     const [datesReloadKey, setDatesReloadKey] = useState(0);
@@ -131,7 +130,6 @@ export function UnplannedVisitPage() {
                 const result = await getUnplannedVisitForm(
                     phone,
                     maxUserId,
-                    userId,
                     requestOptions
                 );
 
@@ -181,7 +179,6 @@ export function UnplannedVisitPage() {
         phone,
         phoneError,
         phoneLoading,
-        userId,
     ]);
 
     useEffect(() => {
@@ -220,7 +217,6 @@ export function UnplannedVisitPage() {
                     phone,
                     maxUserId,
                     selections,
-                    userId,
                     requestOptions
                 );
 
@@ -275,7 +271,6 @@ export function UnplannedVisitPage() {
         phoneError,
         phoneLoading,
         selectedValues,
-        userId,
     ]);
 
     useEffect(() => {
@@ -319,7 +314,6 @@ export function UnplannedVisitPage() {
                     maxUserId,
                     selections,
                     selectedDate,
-                    userId,
                     requestOptions
                 );
 
@@ -375,7 +369,6 @@ export function UnplannedVisitPage() {
         selectedValues,
         selectedDate,
         slotsReloadKey,
-        userId,
     ]);
 
     const handleFieldChange = (fieldId, value) => {
@@ -426,7 +419,6 @@ export function UnplannedVisitPage() {
                 selectedValues,
                 selectedSlot.slotId,
                 selectedDate,
-                userId,
                 requestOptions
             );
 

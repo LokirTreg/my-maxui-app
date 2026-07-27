@@ -12,6 +12,7 @@ export { GetUnplannedVisitCreationFormRequest } from './requests/GetUnplannedVis
 export { GetUnplannedVisitDatesRequest } from './requests/GetUnplannedVisitDatesRequest';
 export { GetUnplannedVisitFormRequest } from './requests/GetUnplannedVisitFormRequest';
 export { GetUnplannedVisitSlotsRequest } from './requests/GetUnplannedVisitSlotsRequest';
+export { GetUserIdByPhoneRequest } from './requests/GetUserIdByPhoneRequest';
 export { GetVisitActionButtonsRequest } from './requests/GetVisitActionButtonsRequest';
 export { GetVisitFieldsRequest } from './requests/GetVisitFieldsRequest';
 export { GetVisitHistoryRequest } from './requests/GetVisitHistoryRequest';

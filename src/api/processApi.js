@@ -12,6 +12,7 @@ import {
     GetUnplannedVisitDatesRequest,
     GetUnplannedVisitFormRequest,
     GetUnplannedVisitSlotsRequest,
+    GetUserIdByPhoneRequest,
     GetVisitActionButtonsRequest,
     GetVisitFieldsRequest,
     GetVisitHistoryRequest,
@@ -48,11 +49,10 @@ export function reserveUnplannedVisitSlot(
     selections,
     slotId,
     date,
-    userId,
     options = {}
 ) {
     return new ReserveUnplannedVisitSlotRequest(
-        { date, maxUserId, phone, selections, slotId, userId },
+        { date, maxUserId, phone, selections, slotId },
         options
     ).execute();
 }
@@ -88,9 +88,9 @@ export function getGeoPosition(
     ).execute();
 }
 
-export function getUnplannedVisitForm(phone, maxUserId, userId, options = {}) {
+export function getUnplannedVisitForm(phone, maxUserId, options = {}) {
     return new GetUnplannedVisitFormRequest(
-        { maxUserId, phone, userId },
+        { maxUserId, phone },
         options
     ).execute();
 }
@@ -111,11 +111,10 @@ export function getUnplannedVisitDates(
     phone,
     maxUserId,
     selections,
-    userId,
     options = {}
 ) {
     return new GetUnplannedVisitDatesRequest(
-        { maxUserId, phone, selections, userId },
+        { maxUserId, phone, selections },
         options
     ).execute();
 }
@@ -125,13 +124,16 @@ export function getUnplannedVisitSlots(
     maxUserId,
     selections,
     date,
-    userId,
     options = {}
 ) {
     return new GetUnplannedVisitSlotsRequest(
-        { date, maxUserId, phone, selections, userId },
+        { date, maxUserId, phone, selections },
         options
     ).execute();
+}
+
+export function getUserIdByPhone(phone, options = {}) {
+    return new GetUserIdByPhoneRequest({ phone }, options).execute();
 }
 
 export function getVisitActionButtons(tvsId, options = {}) {
@@ -146,11 +148,10 @@ export function savePhoneByMaxUserId(
     maxUserId,
     phone,
     chatid,
-    userId,
     options = {}
 ) {
     return new SavePhoneByMaxUserIdRequest(
-        { chatid, maxUserId, phone, userId },
+        { chatid, maxUserId, phone },
         options
     ).execute();
 }
