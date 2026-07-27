@@ -66,26 +66,28 @@ export function MaxUserPhoneProvider({ children }) {
                 
             if (!initUser) {
                 addLog(
-                    'error',
-                    'MAX Bridge initDataUnsafe.user недоступен'
+                    'warn',
+                    'MAX Bridge initDataUnsafe.user недоступен, запрашиваем телефон'
                 );
             } else {
                 addLog('info', `MAX user id из initDataUnsafe: ${maxUserId}`);
             }
 
             if (!maxUserId) {
-                const message = 'Не удалось получить MAX user id';
                 setState({
-                    error: message,
+                    error: '',
                     loading: false,
-                    manualEntryRequired: false,
+                    manualEntryRequired: true,
                     maxUser,
                     maxUserId: '',
                     phone: '',
                     source: '',
                     userId: '',
                 });
-                addLog('error', message);
+                addLog(
+                    'info',
+                    'Показываем форму телефона для поиска данных без maxUserId'
+                );
                 return;
             }
 
@@ -239,13 +241,18 @@ export function MaxUserPhoneProvider({ children }) {
             }));
 
             try {
-                const result = await savePhoneByMaxUserId(
-                    state.maxUserId,
-                    normalizedPhone,
-                    String(getChatId() || ''),
-                    state.userId,
-                    requestOptions
-                );
+                let userId = state.userId;
+
+                if (state.maxUserId) {
+                    const result = await savePhoneByMaxUserId(
+                        state.maxUserId,
+                        normalizedPhone,
+                        String(getChatId() || ''),
+                        state.userId,
+                        requestOptions
+                    );
+                    userId = String(result.userId || userId);
+                }
 
                 setState((current) => ({
                     ...current,
@@ -254,11 +261,13 @@ export function MaxUserPhoneProvider({ children }) {
                     manualEntryRequired: false,
                     phone: normalizedPhone,
                     source: 'manual',
-                    userId: String(result.userId || current.userId),
+                    userId,
                 }));
                 addLog(
                     'info',
-                    `Телефон введён пользователем и сохранён в Process: ${normalizedPhone}`
+                    state.maxUserId
+                        ? `Телефон введён пользователем и сохранён в Process: ${normalizedPhone}`
+                        : `Телефон введён пользователем, ищем данные по номеру: ${normalizedPhone}`
                 );
             } catch (error) {
                 const message =
