@@ -106,10 +106,6 @@ export class GetUnplannedVisitCreationFormRequest extends ProcessApiRequest {
         return {
             date: '13.07.2026',
             fields,
-            purposes: [
-                { id: 'unloading', name: 'Выгрузка' },
-                { id: 'loading', name: 'Загрузка' },
-            ],
             time: '14:00 - 16:00',
         };
     }
@@ -117,11 +113,6 @@ export class GetUnplannedVisitCreationFormRequest extends ProcessApiRequest {
     transformEnvelopeData(data) {
         const normalizedData = Array.isArray(data) ? data[0] : data || {};
         const rawFields = normalizedData.fields ?? normalizedData.items ?? [];
-        const rawPurposes =
-            normalizedData.purposes ??
-            normalizedData.visit_purposes ??
-            normalizedData.visitPurposes ??
-            [];
 
         return {
             date: String(
@@ -133,9 +124,6 @@ export class GetUnplannedVisitCreationFormRequest extends ProcessApiRequest {
             fields: toArray(rawFields)
                 .map(normalizeField)
                 .filter((field) => field.id && field.name),
-            purposes: toArray(rawPurposes)
-                .map(normalizeOption)
-                .filter((option) => option.id && option.name),
             time: String(
                 normalizedData.time ??
                     normalizedData.slot_name ??
@@ -151,10 +139,6 @@ export class GetUnplannedVisitCreationFormRequest extends ProcessApiRequest {
         assertString(response.date, 'getUnplannedVisitCreationForm.response.date');
         assertString(response.time, 'getUnplannedVisitCreationForm.response.time');
         assertArray(response.fields, 'getUnplannedVisitCreationForm.response.fields');
-        assertArray(
-            response.purposes,
-            'getUnplannedVisitCreationForm.response.purposes'
-        );
 
         response.fields.forEach((field, index) => {
             const path = `getUnplannedVisitCreationForm.response.fields[${index}]`;
@@ -169,11 +153,5 @@ export class GetUnplannedVisitCreationFormRequest extends ProcessApiRequest {
             assertArray(field.options, `${path}.options`);
         });
 
-        response.purposes.forEach((purpose, index) => {
-            const path = `getUnplannedVisitCreationForm.response.purposes[${index}]`;
-            assertObject(purpose, path);
-            assertString(purpose.id, `${path}.id`, { allowEmpty: false });
-            assertString(purpose.name, `${path}.name`, { allowEmpty: false });
-        });
     }
 }

@@ -53,15 +53,6 @@ const selectCreationFields = (fields) =>
         type: 'text',
     }));
 
-const selectVisitPurposes = (purposes) =>
-    VISIT_PURPOSES.map((defaultPurpose) => ({
-        ...defaultPurpose,
-        ...(purposes || []).find(
-            (purpose) => purpose.id === defaultPurpose.id
-        ),
-        name: defaultPurpose.name,
-    }));
-
 const createFormState = () => ({
     date: '',
     error: '',
@@ -151,7 +142,6 @@ export function UnplannedVisitCreationPage() {
                 }
 
                 const fields = selectCreationFields(result.fields);
-                const purposes = selectVisitPurposes(result.purposes);
                 const initialValues = Object.fromEntries(
                     fields.map((field) => [field.id, ''])
                 );
@@ -163,7 +153,7 @@ export function UnplannedVisitCreationPage() {
                     error: '',
                     fields,
                     loading: false,
-                    purposes,
+                    purposes: VISIT_PURPOSES,
                     time: result.time || '',
                 });
                 addLog(
