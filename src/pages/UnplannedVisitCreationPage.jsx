@@ -198,12 +198,8 @@ export function UnplannedVisitCreationPage() {
         setSubmitState(createSubmitState());
     };
 
-    const handlePurposeChange = (purposeId, checked) => {
-        setSelectedPurposes((current) =>
-            checked
-                ? [...new Set([...current, purposeId])]
-                : current.filter((id) => id !== purposeId)
-        );
+    const handlePurposeChange = (purposeId) => {
+        setSelectedPurposes([purposeId]);
         setSubmitState(createSubmitState());
     };
 
@@ -394,12 +390,10 @@ export function UnplannedVisitCreationPage() {
                                                 checked={selectedPurposes.includes(
                                                     purpose.id
                                                 )}
-                                                type="checkbox"
-                                                onChange={(event) =>
-                                                    handlePurposeChange(
-                                                        purpose.id,
-                                                        event.target.checked
-                                                    )
+                                                name="visit-purpose"
+                                                type="radio"
+                                                onChange={() =>
+                                                    handlePurposeChange(purpose.id)
                                                 }
                                             />
                                             <span>{purpose.name}</span>
