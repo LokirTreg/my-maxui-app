@@ -5,7 +5,7 @@ import { DevBox } from './components/DevBox';
 import { HistoryPage } from './pages/HistoryPage';
 import { HomePage } from './pages/HomePage';
 import { UnplannedVisitPage } from './pages/UnplannedVisitPage';
-import { UnplannedVisitCreationPage } from './pages/UnplannedVisitCreationPage';
+import { UnplannedVisitUpdatePage } from './pages/UnplannedVisitUpdatePage';
 import { VisitPage } from './pages/VisitPage';
 import { DevLogProvider } from './logs/DevLogProvider';
 import { MaxUserPhoneProvider } from './user/MaxUserPhoneProvider';
@@ -22,8 +22,8 @@ function App() {
                         <Route path="/change-time" element={<ChangeTimePage />} />
                         <Route path="/unplanned-visit" element={<UnplannedVisitPage />} />
                         <Route
-                            path="/unplanned-visit/create"
-                            element={<UnplannedVisitCreationPage />}
+                            path="/unplanned-visit/update"
+                            element={<UnplannedVisitUpdatePage />}
                         />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>

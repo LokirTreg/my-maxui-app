@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
-    createUnplannedVisit,
     getUnplannedVisitCreationForm,
+    updateVisit,
 } from '../api/processApi';
 import { getRequestOptions, isMockApiMode } from '../api/requestOptions';
 import { EmptyState } from '../components/EmptyState';
@@ -80,7 +80,7 @@ const buildVisitPageUrl = (tvsId) => {
     return query ? `${path}?${query}` : path;
 };
 
-export function UnplannedVisitCreationPage() {
+export function UnplannedVisitUpdatePage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const reservationId = searchParams.get('reservationid') || '';
@@ -96,7 +96,7 @@ export function UnplannedVisitCreationPage() {
     const [formState, setFormState] = useState(createFormState);
     const [submitState, setSubmitState] = useState(createSubmitState);
     const [values, setValues] = useState({});
-    const [selectedPurposes, setSelectedPurposes] = useState([]);
+    const [selectedPurpose, setSelectedPurpose] = useState('');
 
     const missingRequiredFields = useMemo(
         () =>
@@ -127,7 +127,7 @@ export function UnplannedVisitCreationPage() {
 
             setFormState({ ...createFormState(), loading: true });
             setSubmitState(createSubmitState());
-            addLog('info', `Загрузка формы создания, резерв ${reservationId}`);
+            addLog('info', `Загрузка формы обновления, резерв ${reservationId}`);
 
             try {
                 const result = await getUnplannedVisitCreationForm(
@@ -147,7 +147,7 @@ export function UnplannedVisitCreationPage() {
                 );
 
                 setValues(initialValues);
-                setSelectedPurposes([]);
+                setSelectedPurpose('');
                 setFormState({
                     date: result.date || '',
                     error: '',
@@ -158,7 +158,7 @@ export function UnplannedVisitCreationPage() {
                 });
                 addLog(
                     'info',
-                    `Форма создания загружена: ${result.fields?.length || 0} полей`
+                    `Форма обновления загружена: ${result.fields?.length || 0} полей`
                 );
             } catch (error) {
                 if (!isActive) {
@@ -168,13 +168,13 @@ export function UnplannedVisitCreationPage() {
                 const message =
                     error instanceof Error
                         ? error.message
-                        : 'Не удалось загрузить форму создания';
+                        : 'Не удалось загрузить форму обновления';
 
                 setFormState({
                     ...createFormState(),
                     error: message,
                 });
-                addLog('error', `Ошибка формы создания визита: ${message}`);
+                addLog('error', `Ошибка формы обновления визита: ${message}`);
             }
         }
 
@@ -199,7 +199,7 @@ export function UnplannedVisitCreationPage() {
     };
 
     const handlePurposeChange = (purposeId) => {
-        setSelectedPurposes([purposeId]);
+        setSelectedPurpose(purposeId);
         setSubmitState(createSubmitState());
     };
 
@@ -216,7 +216,7 @@ export function UnplannedVisitCreationPage() {
             return;
         }
 
-        if (formState.purposes.length > 0 && selectedPurposes.length === 0) {
+        if (formState.purposes.length > 0 && !selectedPurpose) {
             setSubmitState({
                 error: 'Выберите цель визита',
                 loading: false,
@@ -228,29 +228,25 @@ export function UnplannedVisitCreationPage() {
         addLog('action', `Создание визита по резерву ${reservationId}`);
 
         try {
-            const result = await createUnplannedVisit(
+            const result = await updateVisit(
                 phone,
                 maxUserId,
                 reservationId,
                 values,
-                selectedPurposes,
+                selectedPurpose,
                 requestOptions
             );
 
-            if (!result.ok) {
-                throw new Error(result.message || 'Не удалось создать визит');
-            }
-
-            addLog('info', `Незапланированный визит создан: ${result.tvsId}`);
-            navigate(buildVisitPageUrl(result.tvsId), { replace: true });
+            addLog('info', `Незапланированный визит обновлён: ${result.tvsid}`);
+            navigate(buildVisitPageUrl(result.tvsid), { replace: true });
         } catch (error) {
             const message =
                 error instanceof Error
                     ? error.message
-                    : 'Не удалось создать визит';
+                    : 'Не удалось обновить визит';
 
             setSubmitState({ error: message, loading: false });
-            addLog('error', `Ошибка создания незапланированного визита: ${message}`);
+            addLog('error', `Ошибка обновления незапланированного визита: ${message}`);
         }
     };
 
@@ -324,7 +320,7 @@ export function UnplannedVisitCreationPage() {
 
             {reservationId && !phoneLoading && !phoneError && formState.loading && (
                 <Panel className="section">
-                    <Loading text="Загружаем форму создания..." />
+                    <Loading text="Загружаем форму обновления..." />
                 </Panel>
             )}
 
@@ -387,9 +383,9 @@ export function UnplannedVisitCreationPage() {
                                             key={purpose.id}
                                         >
                                             <input
-                                                checked={selectedPurposes.includes(
-                                                    purpose.id
-                                                )}
+                                                checked={
+                                                    selectedPurpose === purpose.id
+                                                }
                                                 name="visit-purpose"
                                                 type="radio"
                                                 onChange={() =>
@@ -413,8 +409,8 @@ export function UnplannedVisitCreationPage() {
                             type="submit"
                         >
                             {submitState.loading
-                                ? 'Создаём визит...'
-                                : 'Создать визит'}
+                                ? 'Обновляем визит...'
+                                : 'Обновить визит'}
                         </Button>
                     </form>
                 )}

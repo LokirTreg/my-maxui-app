@@ -50,7 +50,7 @@ const buildVisitCreationPageUrl = (reservationId) => {
         params.set('mock', '1');
     }
 
-    return `/unplanned-visit/create?${params.toString()}`;
+    return `/unplanned-visit/update?${params.toString()}`;
 };
 
 export function UnplannedVisitPage() {

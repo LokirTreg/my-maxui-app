@@ -1,7 +1,6 @@
 export { ProcessApiRequest } from './requests/ProcessApiRequest';
 export { ChangeVisitSlotRequest } from './requests/ChangeVisitSlotRequest';
 export { CheckSelfRegistrationRequest } from './requests/CheckSelfRegistrationRequest';
-export { CreateUnplannedVisitRequest } from './requests/CreateUnplannedVisitRequest';
 export { ExecuteCallbackRequest } from './requests/ExecuteCallbackRequest';
 export { GetActualVisitRequest } from './requests/GetActualVisitRequest';
 export { GetAvailableVisitDatesRequest } from './requests/GetAvailableVisitDatesRequest';
@@ -19,3 +18,4 @@ export { GetVisitHistoryRequest } from './requests/GetVisitHistoryRequest';
 export { GetWarehouseContactsRequest } from './requests/GetWarehouseContactsRequest';
 export { ReserveUnplannedVisitSlotRequest } from './requests/ReserveUnplannedVisitSlotRequest';
 export { SavePhoneByMaxUserIdRequest } from './requests/SavePhoneByMaxUserIdRequest';
+export { UpdateVisitRequest } from './requests/UpdateVisitRequest';

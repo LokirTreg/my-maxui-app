@@ -38,7 +38,7 @@ const routes = [
     '/visit/132',
     '/change-time?tvsid=123',
     '/unplanned-visit?mock=1',
-    '/unplanned-visit/create?reservationid=reservation-9001&mock=1',
+    '/unplanned-visit/update?reservationid=reservation-9001&mock=1',
 ];
 
 const browser = await chromium.launch({

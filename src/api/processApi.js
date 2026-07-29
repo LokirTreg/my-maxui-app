@@ -1,7 +1,6 @@
 import {
     ChangeVisitSlotRequest,
     CheckSelfRegistrationRequest,
-    CreateUnplannedVisitRequest,
     ExecuteCallbackRequest,
     GetActualVisitRequest,
     GetAvailableVisitDatesRequest,
@@ -19,6 +18,7 @@ import {
     GetWarehouseContactsRequest,
     ReserveUnplannedVisitSlotRequest,
     SavePhoneByMaxUserIdRequest,
+    UpdateVisitRequest,
 } from './processRequests';
 
 export function changeVisitSlot(tvsId, slotId, options = {}) {
@@ -29,16 +29,16 @@ export function checkSelfRegistration(phone, options = {}) {
     return new CheckSelfRegistrationRequest({ phone }, options).execute();
 }
 
-export function createUnplannedVisit(
+export function updateVisit(
     phone,
     maxUserId,
     reservationId,
     fields,
-    purposes,
+    purpose,
     options = {}
 ) {
-    return new CreateUnplannedVisitRequest(
-        { fields, maxUserId, phone, purposes, reservationId },
+    return new UpdateVisitRequest(
+        { fields, maxUserId, phone, purpose, reservationId },
         options
     ).execute();
 }
