@@ -44,3 +44,9 @@ export function assertOptionalString(value, path) {
         });
     }
 }
+
+export function assertNullableString(value, path, options) {
+    if (value !== null) {
+        assertString(value, path, options);
+    }
+}

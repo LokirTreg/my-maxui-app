@@ -2,6 +2,7 @@ import { ProcessApiRequest } from './ProcessApiRequest';
 import { normalizeId } from './normalizeId';
 import {
     assertArray,
+    assertNullableString,
     assertObject,
     assertOptionalString,
     assertString,
@@ -78,7 +79,7 @@ export class GetVisitFieldsRequest extends ProcessApiRequest {
             assertObject(field, path);
             assertString(field.title, `${path}.title`);
             assertOptionalString(field.title_cssclass, `${path}.title_cssclass`);
-            assertString(field.val, `${path}.val`);
+            assertNullableString(field.val, `${path}.val`);
             assertOptionalString(field.val_cssclass, `${path}.val_cssclass`);
         });
     }

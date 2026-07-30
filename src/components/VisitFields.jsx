@@ -11,7 +11,9 @@ export function VisitFields({ fields }) {
                 <div className="visit-field" key={`${field.title}-${index}`}>
                     <span className={field.title_cssclass}>{field.title}</span>
                     <span className={field.val_cssclass}>
-                        {field.title === 'Qrcode' ? (
+                        {field.val === null ? (
+                            'Не определено'
+                        ) : field.title === 'Qrcode' ? (
                             <span dangerouslySetInnerHTML={{ __html: field.val }} />
                         ) : (
                             field.val
