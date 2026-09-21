@@ -19,3 +19,5 @@ export { GetWarehouseContactsRequest } from './requests/GetWarehouseContactsRequ
 export { ReserveUnplannedVisitSlotRequest } from './requests/ReserveUnplannedVisitSlotRequest';
 export { SavePhoneByMaxUserIdRequest } from './requests/SavePhoneByMaxUserIdRequest';
 export { UpdateVisitRequest } from './requests/UpdateVisitRequest';
+
+export { GetUserByPhoneRequest } from './requests/GetUserByPhoneRequest';

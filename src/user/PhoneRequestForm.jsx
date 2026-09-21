@@ -72,7 +72,7 @@ export function PhoneRequestForm({ error, loading, onSubmit }) {
                             disabled={loading}
                             type="submit"
                         >
-                            {loading ? 'Сохраняем...' : 'Продолжить'}
+                            {loading ? 'Получаем профиль...' : 'Продолжить'}
                         </Button>
                     </form>
                 </section>

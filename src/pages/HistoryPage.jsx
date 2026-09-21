@@ -25,7 +25,6 @@ export function HistoryPage() {
     const {
         error: phoneError,
         loading: phoneLoading,
-        maxUserId,
         phone,
         retry: retryPhone,
     } = useMaxUserPhone();

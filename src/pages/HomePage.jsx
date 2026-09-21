@@ -12,10 +12,9 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { Loading } from '../components/Loading';
 import { useMaxUserPhone } from '../user/useMaxUserPhone';
 
-const requestOptions = getRequestOptions();
+import { getRoleMenu, MENU_ITEMS } from '../user/roleMenu';
 
-const buildUnplannedVisitUrl = () =>
-    isMockApiMode() ? '/unplanned-visit?mock=1' : '/unplanned-visit';
+const requestOptions = getRequestOptions();
 
 const createActualVisitState = () => ({
     error: '',
@@ -39,7 +38,7 @@ export function HomePage() {
         maxUserId,
         phone,
         retry,
-        source,
+        role,
     } = useMaxUserPhone();
     const [searchParams] = useSearchParams();
     const tvsId = searchParams.get('tvsid') || '';
@@ -56,7 +55,10 @@ export function HomePage() {
         shouldUseActualVisitRequest && actualVisitState.loading;
     const actualVisitError =
         shouldUseActualVisitRequest && actualVisitState.error;
+    const menuIds = getRoleMenu(role);
+    const allowsSelfRegistration = menuIds.includes('selfRegistration');
     const canShowSelfRegistration =
+        allowsSelfRegistration &&
         !phoneLoading &&
         !phoneError &&
         selfRegistrationState.phone === phone &&
@@ -139,7 +141,7 @@ export function HomePage() {
     ]);
 
     useEffect(() => {
-        if (phoneLoading || phoneError || !phone) {
+        if (phoneLoading || phoneError || !phone || !allowsSelfRegistration) {
             return;
         }
 
@@ -208,7 +210,7 @@ export function HomePage() {
         return () => {
             isActive = false;
         };
-    }, [addLog, phone, phoneError, phoneLoading]);
+    }, [addLog, phone, phoneError, phoneLoading, allowsSelfRegistration]);
 
     return (
         <Layout>
@@ -219,35 +221,19 @@ export function HomePage() {
                     </h1>
                 </div>
                 <div className="header-actions">
-                    <Button
-                        className="secondary-button"
-                        onClick={() => {
-                            addLog('action', `Открываем историю для ${phone}`);
-                            navigate('/history');
-                        }}
-                        disabled={phoneLoading || Boolean(phoneError)}
-                    >
-                        История визитов
-                    </Button>
-                    {canShowSelfRegistration && (
+                    {menuIds.filter((id) => id !== 'selfRegistration' || canShowSelfRegistration).map((id) => (
                         <Button
+                            key={id}
                             className="secondary-button"
+                            disabled={phoneLoading || Boolean(phoneError)}
                             onClick={() => {
-                                addLog(
-                                    'action',
-                                    'Открываем регистрацию незапланированного визита'
-                                );
-                                navigate(buildUnplannedVisitUrl());
+                                const item = MENU_ITEMS[id];
+                                navigate(isMockApiMode() ? `${item.path}?mock=1` : item.path);
                             }}
-                            disabled={
-                                phoneLoading ||
-                                Boolean(phoneError) ||
-                                selfRegistrationState.loading
-                            }
                         >
-                            Саморегистрация
+                            {MENU_ITEMS[id].title}
                         </Button>
-                    )}
+                    ))}
                 </div>
             </div>
 

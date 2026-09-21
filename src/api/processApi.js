@@ -1,4 +1,5 @@
 import {
+    GetUserByPhoneRequest,
     ChangeVisitSlotRequest,
     CheckSelfRegistrationRequest,
     ExecuteCallbackRequest,
@@ -174,4 +175,8 @@ export function getVisitHistory(phone, options = {}) {
 
 export function executeCallback(callback, options = {}) {
     return new ExecuteCallbackRequest({ callback }, options).execute();
+}
+
+export function getUserByPhone(phone, maxId = '', options = {}) {
+    return new GetUserByPhoneRequest({ phone, maxId }, options).execute();
 }
