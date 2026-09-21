@@ -1,5 +1,5 @@
 import { Button, Flex, Panel } from '@maxhub/max-ui';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
@@ -13,6 +13,8 @@ import { Layout } from '../components/Layout';
 import { Loading } from '../components/Loading';
 import { useDevLog } from '../logs/useDevLog';
 import { useMaxUserPhone } from '../user/useMaxUserPhone';
+
+import { VisitPhoneGate } from '../components/VisitPhoneGate';
 
 const requestOptions = getRequestOptions();
 const CREATION_FIELDS = [
@@ -81,6 +83,10 @@ const buildVisitPageUrl = (tvsId) => {
 };
 
 export function UnplannedVisitUpdatePage() {
+    return <VisitPhoneGate>{(phone) => <VisitUpdateForm phone={phone} />}</VisitPhoneGate>;
+}
+
+function VisitUpdateForm({ phone }) {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const reservationId = searchParams.get('reservationid') || '';
@@ -89,9 +95,10 @@ export function UnplannedVisitUpdatePage() {
         error: phoneError,
         loading: phoneLoading,
         maxUserId,
-        phone,
+        role,
         retry,
     } = useMaxUserPhone();
+    const submitting = useRef(false);
     const [reloadKey, setReloadKey] = useState(0);
     const [formState, setFormState] = useState(createFormState);
     const [submitState, setSubmitState] = useState(createSubmitState);
@@ -194,17 +201,20 @@ export function UnplannedVisitUpdatePage() {
     ]);
 
     const handleValueChange = (fieldId, value) => {
+        if (submitting.current) return;
         setValues((current) => ({ ...current, [fieldId]: value }));
         setSubmitState(createSubmitState());
     };
 
     const handlePurposeChange = (purposeId) => {
+        if (submitting.current) return;
         setSelectedPurpose(purposeId);
         setSubmitState(createSubmitState());
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (submitting.current) return;
 
         if (missingRequiredFields.length > 0) {
             setSubmitState({
@@ -224,6 +234,7 @@ export function UnplannedVisitUpdatePage() {
             return;
         }
 
+        submitting.current = true;
         setSubmitState({ error: '', loading: true });
         addLog('action', `Создание визита по резерву ${reservationId}`);
 
@@ -245,6 +256,7 @@ export function UnplannedVisitUpdatePage() {
                     ? error.message
                     : 'Не удалось обновить визит';
 
+            submitting.current = false;
             setSubmitState({ error: message, loading: false });
             addLog('error', `Ошибка обновления незапланированного визита: ${message}`);
         }
@@ -294,6 +306,7 @@ export function UnplannedVisitUpdatePage() {
             <div className="page-header">
                 <div>
                     <h1 className="page-title">Данные визита</h1>
+                    {role === 'sto' && <p className="page-description">Телефон водителя: +{phone}</p>}
                     <p className="page-description">
                         Заполните данные водителя, транспорта и цель визита
                     </p>

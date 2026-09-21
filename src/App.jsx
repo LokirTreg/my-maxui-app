@@ -20,6 +20,7 @@ function App() {
                         <Route path="/history" element={<HistoryPage />} />
                         <Route path="/visit/:id" element={<VisitPage />} />
                         <Route path="/change-time" element={<ChangeTimePage />} />
+                        <Route path="/register-visit" element={<UnplannedVisitPage />} />
                         <Route path="/unplanned-visit" element={<UnplannedVisitPage />} />
                         <Route
                             path="/unplanned-visit/update"

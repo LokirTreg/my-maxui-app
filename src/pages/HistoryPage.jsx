@@ -25,7 +25,8 @@ export function HistoryPage() {
     const {
         error: phoneError,
         loading: phoneLoading,
-        phone,
+        userId,
+        role,
         retry: retryPhone,
     } = useMaxUserPhone();
     const [reloadKey, setReloadKey] = useState(0);
@@ -37,11 +38,11 @@ export function HistoryPage() {
         async function loadHistory() {
             await Promise.resolve();
 
-            if (!isActive || !phone) {
+            if (!isActive || phoneLoading || phoneError || !userId || !role) {
                 return;
             }
 
-            addLog('info', `Загрузка истории визитов для ${phone}`);
+            addLog('info', `Загрузка истории визитов для ${userId} (${role})`);
 
             setState((current) => ({
                 ...current,
@@ -50,7 +51,7 @@ export function HistoryPage() {
             }));
 
             try {
-                const result = await getVisitHistory(phone, requestOptions);
+                const result = await getVisitHistory(userId, role, requestOptions);
 
                 if (!isActive) {
                     return;
@@ -64,7 +65,7 @@ export function HistoryPage() {
 
                 addLog(
                     'info',
-                    `История для ${phone}: визитов ${result.buttons?.length || 0}`
+                    `История для ${userId} (${role}): визитов ${result.buttons?.length || 0}`
                 );
             } catch (error) {
                 if (!isActive) {
@@ -82,7 +83,7 @@ export function HistoryPage() {
                     visits: [],
                 });
 
-                addLog('error', `Ошибка истории ${phone}: ${message}`);
+                addLog('error', `Ошибка истории ${userId} (${role}): ${message}`);
             }
         }
 
@@ -91,7 +92,7 @@ export function HistoryPage() {
         return () => {
             isActive = false;
         };
-    }, [addLog, phone, reloadKey]);
+    }, [addLog, userId, role, phoneLoading, phoneError, reloadKey]);
 
     const homeUrl = '/';
 

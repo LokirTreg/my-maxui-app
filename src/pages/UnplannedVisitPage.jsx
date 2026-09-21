@@ -1,5 +1,5 @@
 import { Button, Flex, Panel } from '@maxhub/max-ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -15,6 +15,8 @@ import { Layout } from '../components/Layout';
 import { Loading } from '../components/Loading';
 import { useDevLog } from '../logs/useDevLog';
 import { useMaxUserPhone } from '../user/useMaxUserPhone';
+
+import { VisitPhoneGate } from '../components/VisitPhoneGate';
 
 const requestOptions = getRequestOptions();
 
@@ -54,16 +56,21 @@ const buildVisitCreationPageUrl = (reservationId) => {
 };
 
 export function UnplannedVisitPage() {
+    return <VisitPhoneGate>{(phone) => <VisitBookingForm phone={phone} />}</VisitPhoneGate>;
+}
+
+function VisitBookingForm({ phone }) {
     const navigate = useNavigate();
     const { addLog } = useDevLog();
     const {
         error: phoneError,
         loading: phoneLoading,
         maxUserId,
-        phone,
+        role,
         retry,
         userId,
     } = useMaxUserPhone();
+    const submitting = useRef(false);
     const [fieldsReloadKey, setFieldsReloadKey] = useState(0);
     const [datesReloadKey, setDatesReloadKey] = useState(0);
     const [slotsReloadKey, setSlotsReloadKey] = useState(0);
@@ -378,6 +385,7 @@ export function UnplannedVisitPage() {
     ]);
 
     const handleFieldChange = (fieldId, value) => {
+        if (submitting.current) return;
         setSelectedValues((current) => ({
             ...current,
             [fieldId]: value,
@@ -391,6 +399,7 @@ export function UnplannedVisitPage() {
     };
 
     const handleDateSelect = (date) => {
+        if (date === selectedDate || submitting.current) return;
         setSelectedDate(date);
         setSlotsState(createSlotsState());
         setSubmitState(createSubmitState());
@@ -399,16 +408,18 @@ export function UnplannedVisitPage() {
     };
 
     const handleSlotSelect = (slot) => {
+        if (submitting.current) return;
         setSelectedSlotId(slot.slotId);
         setSubmitState(createSubmitState());
         addLog('action', `Выбран слот незапланированного визита: ${slot.slotId}`);
     };
 
     const handleReserveSlot = async () => {
-        if (!selectedSlot) {
+        if (!selectedSlot || submitting.current) {
             return;
         }
 
+        submitting.current = true;
         setSubmitState({
             error: '',
             loading: true,
@@ -437,7 +448,9 @@ export function UnplannedVisitPage() {
                 'info',
                 `Время визита зарезервировано, визит ${result.tvsId}: ${result.message}`
             );
-            navigate(buildVisitCreationPageUrl(result.reservationId));
+            navigate(buildVisitCreationPageUrl(result.reservationId), {
+                state: { visitPhone: phone, bookingUserId: userId },
+            });
         } catch (error) {
             const message =
                 error instanceof Error
@@ -448,6 +461,7 @@ export function UnplannedVisitPage() {
                 error: message,
                 loading: false,
             });
+            submitting.current = false;
             addLog('error', `Ошибка резервирования времени: ${message}`);
         }
     };
@@ -457,8 +471,9 @@ export function UnplannedVisitPage() {
             <div className="page-header">
                 <div>
                     <h1 className="page-title">
-                        Незапланированный визит
+                        {role === 'sto' ? 'Зарегистрировать визит' : 'Незапланированный визит'}
                     </h1>
+                    {role === 'sto' && <p className="page-description">Телефон водителя: +{phone}</p>}
                 </div>
             </div>
 

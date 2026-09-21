@@ -11,12 +11,17 @@ const formatPhone = (value) => {
     return `+${digits}`;
 };
 
-export function PhoneRequestForm({ error, loading, onSubmit }) {
+export function PhoneRequestForm({
+    error, loading, onSubmit,
+    title = 'Укажите номер телефона',
+    description = 'Не удалось получить номер автоматически. Он нужен, чтобы найти ваши визиты и оформить новый.',
+}) {
     const [phone, setPhone] = useState('');
     const [validationError, setValidationError] = useState('');
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (loading) return;
 
         const digits = phone.replace(/\D/g, '');
 
@@ -34,10 +39,9 @@ export function PhoneRequestForm({ error, loading, onSubmit }) {
             <div className="app-shell">
                 <section className="section phone-request">
                     <div>
-                        <h1 className="page-title">Укажите номер телефона</h1>
+                        <h1 className="page-title">{title}</h1>
                         <p className="page-description">
-                            Не удалось получить номер автоматически. Он нужен,
-                            чтобы найти ваши визиты и оформить новый.
+                            {description}
                         </p>
                     </div>
 

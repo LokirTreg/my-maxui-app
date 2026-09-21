@@ -16,21 +16,27 @@ export class GetVisitHistoryRequest extends ProcessApiRequest {
     }
 
     getMockFailureKey() {
-        return this.params.phone;
+        return this.params.userId;
     }
 
     buildProcessParams() {
         return {
-            phone: String(this.params.phone || ''),
+            user_id: String(this.params.userId || ''),
+            role: String(this.params.role || ''),
         };
     }
 
+    validateParams(params) {
+        assertString(params.userId, 'getVisitHistory.userId', { allowEmpty: false });
+        assertString(params.role, 'getVisitHistory.role', { allowEmpty: false });
+    }
+
     buildMockResponse() {
-        const phone = String(this.params.phone || '');
+        const userId = String(this.params.userId || '');
 
         return {
             buttons:
-                phone === 'empty'
+                userId === 'empty'
                     ? []
                     : [
                           {

@@ -169,8 +169,8 @@ export function getWarehouseContacts(tvsId, options = {}) {
     return new GetWarehouseContactsRequest({ tvsId }, options).execute();
 }
 
-export function getVisitHistory(phone, options = {}) {
-    return new GetVisitHistoryRequest({ phone }, options).execute();
+export function getVisitHistory(userId, role, options = {}) {
+    return new GetVisitHistoryRequest({ userId, role }, options).execute();
 }
 
 export function executeCallback(callback, options = {}) {
