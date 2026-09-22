@@ -40,9 +40,9 @@ try {
             await route.fulfill({ json: { success: true, message: 'OK', timestamp: new Date().toISOString(), data } });
         });
         await page.goto(server.resolvedUrls.local[0]);
-        const menu = role === 'drv' ? 'Регистрация' : 'Зарегистрировать визит';
+        const menu = role === 'drv' ? 'Саморегистрация' : 'Зарегистрировать визит';
         await page.getByRole('button', { name: menu, exact: true }).waitFor();
-        assert.equal(await page.getByRole('button', { name: role === 'drv' ? 'Зарегистрировать визит' : 'Регистрация', exact: true }).count(), 0);
+        assert.equal(await page.getByRole('button', { name: role === 'drv' ? 'Зарегистрировать визит' : 'Саморегистрация', exact: true }).count(), 0);
         await page.getByRole('button', { name: 'История визитов', exact: true }).click();
         await page.getByRole('button', { name: '#132 12.05.2026', exact: true }).waitFor();
         const history = calls.find(call => call.method === 'get_visit_history');

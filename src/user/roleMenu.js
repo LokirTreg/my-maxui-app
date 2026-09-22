@@ -7,7 +7,7 @@ export const DEFAULT_MENU = Object.freeze(['history', 'selfRegistration']);
 export const MENU_ITEMS = Object.freeze({
     registerVisit: { title: 'Зарегистрировать визит', path: '/register-visit' },
     history: { title: 'История визитов', path: '/history' },
-    selfRegistration: { title: 'Регистрация', path: '/unplanned-visit' },
+    selfRegistration: { title: 'Саморегистрация', path: '/unplanned-visit' },
 });
 
 export function getRoleMenu(role, menus = ROLE_MENUS) {
