@@ -19,7 +19,8 @@ const executablePath = [process.env.CHROME_PATH, 'C:/Program Files/Google/Chrome
 let browser;
 try {
     browser = await chromium.launch({ executablePath, headless: true });
-    for (const role of ['drv', 'sto']) {
+    for (const rawRole of ['drv', 'sto', 'STO', ' STO ', 'DRV']) {
+        const role = rawRole.trim().toLowerCase();
         const page = await browser.newPage();
         page.setDefaultTimeout(10000);
         const calls = [];
@@ -34,7 +35,7 @@ try {
             const params = request.method() === 'POST' ? request.postDataJSON().data : Object.fromEntries(url.searchParams);
             calls.push({ method, params });
             const data = method === 'get_user_by_phone'
-                ? { userid: '7151', role, maxid: '123456', phone: '79990000000' }
+                ? { userid: '7151', role: rawRole, maxid: '123456', phone: '79990000000' }
                 : mocks[method]?.();
             assert.notEqual(data, undefined, `Missing mock: ${method}`);
             await route.fulfill({ json: { success: true, message: 'OK', timestamp: new Date().toISOString(), data } });
@@ -89,7 +90,7 @@ try {
             assert.equal(calls.filter(call => call.method === 'update_visit').length, 1);
         }
         assert.deepEqual(errors, []);
-        console.log(`PASS ${role}: menu, history identity, visitor phone${role === 'sto' ? ', reservation, reload and update' : ''}`);
+        console.log(`PASS ${JSON.stringify(rawRole)}: menu, history identity, visitor phone${role === 'sto' ? ', reservation, reload and update' : ''}`);
         await page.close();
     }
 } finally {

@@ -4,6 +4,7 @@ import { getRequestOptions } from '../api/requestOptions';
 import { useDevLog } from '../logs/useDevLog';
 import { MaxUserPhoneContext } from './maxUserPhoneContext';
 import { PhoneRequestForm } from './PhoneRequestForm';
+import { normalizeRole } from './normalizeRole';
 
 const createInitialState = () => ({
     error: '', loading: true, manualEntryRequired: false,
@@ -12,7 +13,7 @@ const createInitialState = () => ({
 
 // API field names are preserved in the request; map to UI names here.
 const toProfile = (result) => ({
-    userId: result.userid, role: result.role,
+    userId: result.userid, role: normalizeRole(result.role),
     maxUserId: result.maxid, phone: result.phone,
 });
 
