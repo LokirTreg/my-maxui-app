@@ -164,7 +164,7 @@ export function HomePage() {
             try {
                 addLog(
                     'info',
-                    `Process: проверка саморегистрации для телефона ${phone}`
+                    `Process: проверка регистрации для телефона ${phone}`
                 );
 
                 const result = await checkSelfRegistration(phone, requestOptions);
@@ -182,8 +182,8 @@ export function HomePage() {
                 addLog(
                     'info',
                     result.registered
-                        ? `Саморегистрация доступна для ${phone}`
-                        : `Саморегистрация недоступна для ${phone}`
+                        ? `Регистрация доступна для ${phone}`
+                        : `Регистрация недоступна для ${phone}`
                 );
             } catch (error) {
                 if (!isActive) {
@@ -193,7 +193,7 @@ export function HomePage() {
                 const message =
                     error instanceof Error
                         ? error.message
-                        : 'Не удалось проверить саморегистрацию';
+                        : 'Не удалось проверить регистрацию';
 
                 setSelfRegistrationState({
                     error: message,
@@ -201,7 +201,7 @@ export function HomePage() {
                     phone,
                     registered: false,
                 });
-                addLog('error', `Ошибка проверки саморегистрации: ${message}`);
+                addLog('error', `Ошибка проверки регистрации: ${message}`);
             }
         }
 
